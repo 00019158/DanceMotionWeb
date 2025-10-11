@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dance Motion — магазин</title>
+
+  <!-- Брендовые цвета: -- -->
+  <style>
+    :root{
+      --brand-light: #e3f1fe;
+      --brand-mid:   #cce4fc;
+      --brand-dark:  #004f73;
+      --muted: #6b7280;
+      --card-radius: 12px;
+      --shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: var(--brand-light);
+      color: #0b1720;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .categories {
+  display: flex;
+  flex-wrap: wrap;           /* чтобы переносились на новую строку */
+  justify-content: center;   /* центрируем элементы */
+  gap: 10px;                 /* расстояние между кнопками */
+  margin: 10px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.categories li {
+  background: #f8f9fa;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.categories li:hover {
+  background: #e3e6ea;
+}
+
+    .container{
+      width: 100%;
+      max-width:1100px;
+      margin:0 auto;
+      padding:12px;
+    }
+
+    /* Header */
+    header{display:flex;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo img{
+      height:120px;
+      width:auto;
+      display:block;
+    }
+    .brand h1{margin:0;font-size:20px;color:var(--brand-dark)}
+    .brand p{margin:0;font-size:12px;color:var(--muted)}
+
+    /* Search */
+    .search-wrap{flex:1;min-width:180px;margin:0 12px}
+    .search{display:flex;gap:8px}
+    .search input{
+      width:100%;padding:12px 14px;border-radius:999px;border:1px solid rgba(0,0,0,0.06);
+      background: #fff;box-shadow: 0 2px 8px rgba(2,6,23,0.03);
+      font-size:14px;
+    }
+    .icon-btn{background:transparent;border:0;font-size:18px;cursor:pointer}
+    .right-icons{display:flex;gap:12px;align-items:center}
+
+    /* Categories */
+    .categories{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    .cat-btn{padding:8px 12px;border-radius:10px;border:0;background:transparent;color:var(--brand-dark);cursor:pointer}
+    .cat-btn.active{background:var(--brand-mid);box-shadow:var(--shadow);transform:scale(1.02)}
+
+    /* Main */
+    .hero{margin-top:22px;padding:22px;border-radius:14px;background:linear-gradient(90deg,var(--brand-mid),#f4fbff);display:flex;align-items:center;gap:18px;box-shadow:var(--shadow);flex-wrap:wrap}
+    .hero .text{flex:1;min-width:200px}
+    .hero h2{margin:0;font-size:26px;color:var(--brand-dark)}
+    .hero p{margin:6px 0 0;color:var(--muted)}
+    .hero .cta{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--brand-dark);color:#fff;border:0;cursor:pointer}
+
+    /* Grid */
+    .grid{display:grid;grid-template-columns:repeat(1,1fr);gap:16px;margin-top:18px}
+    @media(min-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media(min-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}}
+
+    .card{background:var(--brand-mid);padding:14px;border-radius:var(--card-radius);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px}
+    .img-box{height:170px;border-radius:10px;background:linear-gradient(180deg,#fff,#eef9ff);display:flex;align-items:center;justify-content:center;color:var(--muted)}
+    .title{font-weight:600;color:var(--brand-dark)}
+    .meta{font-size:13px;color:var(--muted)}
+    .price-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .old-price{text-decoration:line-through;color:#6b7280;font-size:13px}
+    .price{font-weight:800;color:var(--brand-dark)}
+
+    .card .actions{display:flex;gap:8px;margin-top:6px}
+    .btn{flex:1;padding:9px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+    .btn.cart{background:var(--brand-dark);color:#fff}
+    .btn.fav{background:#fff;border:1px solid rgba(0,0,0,0.1);color:var(--brand-dark)}
+
+    /* footer */
+    footer{margin-top:36px;padding:18px;color:var(--muted);font-size:13px;text-align:center}
+
+    /* Drawer / Modal */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:none;z-index:40}
+    .drawer{position:fixed;right:0;top:0;height:100vh;width:380px;background:#fff;box-shadow: -20px 0 40px rgba(2,6,23,0.08);transform:translateX(110%);transition:transform .28s ease;z-index:45;padding:18px;display:flex;flex-direction:column}
+    .drawer.open{transform:translateX(0)}
+    .close-btn{background:transparent;border:0;font-size:18px;cursor:pointer}
+    .cart-list{flex:1;overflow:auto;margin-top:12px;display:flex;flex-direction:column;gap:10px}
+    .cart-item{display:flex;gap:12px;align-items:center;background:#f8fafc;padding:10px;border-radius:10px}
+    .qty{display:flex;gap:6px;align-items:center}
+
+    /* Profile modal */
+    .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.98);background:#fff;padding:18px;border-radius:12px;box-shadow:var(--shadow);z-index:50;min-width:280px;display:none}
+    .modal.open{display:block;transform:translate(-50%,-50%) scale(1)}
+    .modal input{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef7;margin-top:8px}
+
+    /* badges */
+    .badge{display:inline-flex;align-items:center;justify-content:center;background:var(--brand-dark);color:#fff;border-radius:999px;padding:4px 8px;font-size:12px}
+
+    /* small helpers */
+    .muted{color:var(--muted);font-size:13px}
+    .underline{color:var(--brand-dark);text-decoration:underline;background:transparent;border:0;cursor:pointer}
+
+    
+  .right-icons {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+}
+
+.icon-img {
+  width: 34px;
+  height: 34px;
+}
+
+.icon-count {
+  margin-left: 1px;
+  font-weight: 700;
+  color: #004f73; /* твой брендовый тёмный цвет */
+}
+
+.img-box {
+  width: 430px;
+  height: 252px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* заполняет, может обрезать края */
+}
+
+.new-label {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #004f73;  /* твой брендовый цвет */
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+
+
+    /* 📱 Мобильная версия */
+    @media (max-width: 480px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+      .search-wrap {
+        width: 100%;
+        margin: 10px 0;
+      }
+      .hero {
+        flex-direction: column;
+        text-align: center;
+      }
+      .hero .text {
+        text-align: center;
+      }
+      .right-icons {
+        width: 100%;
+        justify-content: space-around;
+      }
+      .brand h1 {
+        font-size: 30px;
+      }
+
+      .drawer {
+       width: 100%;
+      }
+
+  .hero div[style*="width: 260px"] {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .img-box {
+    width: 100%;
+    height: auto;
+  }
+}
+
+    
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">
+  <img src="/Images/логотип.png" alt="Dance Motion">
+</div>
+
+        <div>
+          <h1>Dance Motion</h1>
+          <p>Танцевальная одежда и туфли</p>
+        </div>
+      </div>
+
+      <div class="search-wrap">
+        <div class="search">
+          <input id="searchInput" placeholder="Поиск по сайту..." />
+          <button class="icon-btn" id="searchBtn" title="Поиск">🔍</button>
+        </div>
+      </div>
+
+     <div class="right-icons">
+  <button id="favBtn" class="icon-btn" title="Избранное">
+    <img src="/Images/Сердце.PNG" alt="Избранное" class="icon-img">
+    <span id="favCount" class="icon-count">0</span>
+  </button>
+
+  <button id="profileBtn" class="icon-btn" title="Профиль">
+    <img src="/Images/Профиль.PNG" alt="Профиль" class="icon-img">
+  </button>
+
+  <button id="cartBtn" class="icon-btn" title="Корзина">
+    <img src="/Images/Корзина.PNG" alt="Корзина" class="icon-img">
+    <span id="cartCount" class="icon-count">0</span>
+  </button>
+</div>
+
+    </header>
+
+   <nav class="categories" id="categoryNav"></nav>
+
+<section class="hero">
+  <div class="text">
+    <h2>Каталог Dance Motion</h2>
+    <p>Классика и новинки для спортивных и современных танцев.
+       Быстрая доставка по всему миру!</p>
+    <button class="cta" id="shopNow">Перейти в каталог</button>
+  </div>
+
+  <!-- блок с изображением -->
+  <div style="
+    width: 260px;
+    height: 200px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, var(--brand-mid), #fff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  ">
+    <img src="/Images/основа.png" alt="Dance Motion Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">
+  </div>
+</section>
+
+<!-- Каталог всех товаров -->
+<h3 style="margin-top:18px;color:var(--brand-dark)">Каталог</h3>
+<div id="productsGrid" class="grid"></div>
+
+
+    <!-- Туфли -->
+ <h3 style="margin-top:18px;color:var(--brand-dark)">Туфли</h3>
+<div id="shoesGrid" class="grid"></div>
+
+    <!-- Скидки -->
+    <h3 style="margin-top:18px;color:var(--brand-dark)">Скидки</h3>
+    <div id="discountsGrid" class="grid"></div>
+
+    <footer>
+      © Dance Motion — Все права защищены. Контакты: +998(91)123-60-66 · Instagram: @dancemotion.uz
+    </footer>
+  </div>
+
+  <!-- overlay -->
+  <div id="overlay" class="overlay"></div>
+
+  <!-- Cart Drawer -->
+  <aside id="cartDrawer" class="drawer" aria-hidden="true">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <h3 style="margin:0;color:var(--brand-dark)">Корзина</h3>
+      <button class="close-btn" id="closeCart">✖</button>
+    </div>
+
+    <div id="cartList" class="cart-list"></div>
+
+    <div style="margin-top:12px">
+      <div class="muted">Итого: <b id="cartTotal">0 сум</b></div>
+      <div class="muted" style="margin-top:6px">Кешбэк будет начислен 5% от суммы покупки.</div>
+
+      <div style="margin-top:8px">
+        <label class="muted">Использовать кешбэк (если есть)</label>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <input id="cashbackUseInput" type="number" placeholder="0" min="0" style="flex:1;padding:8px;border-radius:8px;border:1px solid #e6eef7" />
+          <button id="applyCashbackBtn" class="btn" style="background:var(--brand-mid);color:var(--brand-dark)">Применить</button>
+        </div>
+        <div class="muted" style="margin-top:6px">Доступно кешбэка: <b id="cashbackAvailable">0 сум</b></div>
+      </div>
+
+      <button id="checkoutBtn" class="btn cart" style="margin-top:10px">Оформить заказ</button>
+    </div>
+  </aside>
+
+  <!-- Profile Modal -->
+  <div id="profileModal" class="modal" role="dialog" aria-modal="true">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h3 style="margin:0;color:var(--brand-dark)">Профиль</h3>
+      <button id="closeProfile" class="close-btn">✖</button>
+    </div>
+
+    <div id="profileBody" style="margin-top:12px">
+      <!-- content injected by JS -->
+    </div>
+  </div>
+
+  
+
+
+
+<script>
+/* ========== DATA ========== */
+const PRODUCTS = [
+  {id:1,title:'Туфли Рейтинг-Белые (Кожа)',price:350000,category:'Девочкам',discount:0,isNew:true,img:'/images/w3.jpg'},
+  {id:2,title:'Туфли Рейтинг - Светло-Бежевые (Сатин)',price:350000,category:'Девочкам',discount:0,isNew:true,img:'/images/B2.jpg'},
+  {id:3,title:'Туфли Рейтинг - Коричневые (Кожа) ',price:350000,category:'Девочкам',discount:0,isNew:false,img:'/images/B.jpg'},
+  {id:4,title:'Туфли Рейтинг- Красные (Кожа)' ,price:350000,category:'Девочкам',discount:0,isNew:true,img:'/images/R.jpg'},
+  {id:5,title:'Туфли Рейтинг- Черные (Сатин)' ,price:350000,category:'Девочкам',discount:0,isNew:true,img:'/images/BL.jpg'},
+  {id:6,title:'Туфли Рейтинг- Коричневые (Сатин)' ,price:350000,category:'Девочкам',discount:10,isNew:true,img:'/images/BR.jpg'},
+  
+
+
+];
+
+
+
+
+/* ========== STORAGE HELPERS ========== */
+const LS_CART = 'dm_cart_v1';
+const LS_FAV  = 'dm_fav_v1';
+const LS_USER = 'dm_user_v1';
+
+function readJSON(key, fallback){
+  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+  catch(e){ return fallback; }
+}
+function writeJSON(key, val){
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){}
+}
+
+/* ========== APP STATE ========== */
+let cart = readJSON(LS_CART, []);
+let favs = readJSON(LS_FAV, []);
+let user = readJSON(LS_USER, { logged:false, email:'', cashback:0 });
+
+/* ========== DOM refs ========== */
+const productsGrid = document.getElementById('productsGrid');
+const discountsGrid = document.getElementById('discountsGrid');
+const categoryNav = document.getElementById('categoryNav');
+const searchInput = document.getElementById('searchInput');
+const cartCount = document.getElementById('cartCount');
+const favCount = document.getElementById('favCount');
+const cartBtn = document.getElementById('cartBtn');
+const favBtn = document.getElementById('favBtn');
+const profileBtn = document.getElementById('profileBtn');
+const cartDrawer = document.getElementById('cartDrawer');
+const overlay = document.getElementById('overlay');
+const cartList = document.getElementById('cartList');
+const cartTotal = document.getElementById('cartTotal');
+const cashbackAvailable = document.getElementById('cashbackAvailable');
+const cashbackUseInput = document.getElementById('cashbackUseInput');
+const applyCashbackBtn = document.getElementById('applyCashbackBtn');
+const checkoutBtn = document.getElementById('checkoutBtn');
+const profileModal = document.getElementById('profileModal');
+const profileBody = document.getElementById('profileBody');
+const closeCart = document.getElementById('closeCart');
+const closeProfile = document.getElementById('closeProfile');
+const shopNowBtn = document.getElementById('shopNow');
+
+const categories = ['Все','Женщинам','Мужчинам','Девочкам','Мальчикам','Туфли','Скидки'];
+let activeCategory = 'Все';
+
+/* ========== UTIL ========== */
+function formatSum(v){ return (Math.round(v)).toLocaleString('ru-RU') + ' сум'; }
+function calcPriceAfterDiscount(p){ return Math.round(p.price * (1 - (p.discount||0)/100)); }
+
+/* ========== RENDER ========== */
+function renderCategoryNav(){
+  categoryNav.innerHTML = '';
+  categories.forEach(cat=>{
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (cat === activeCategory ? ' active' : '');
+    btn.textContent = cat;
+    btn.onclick = ()=>{ activeCategory = cat; renderAll(); window.scrollTo({top:220,behavior:'smooth'}) };
+    categoryNav.appendChild(btn);
+  });
+}
+function productMatchesFilter(p){
+  const q = (searchInput.value || '').trim().toLowerCase();
+  if(activeCategory !== 'Все'){
+    if(activeCategory === 'Скидки' && !(p.discount > 0)) return false;
+    if(activeCategory === 'Новинки' && !p.isNew) return false;
+    if(['Женщинам','Мужчинам','Девочкам','Мальчикам'].includes(activeCategory) && p.category !== activeCategory) return false;
+  }
+  if(q && !p.title.toLowerCase().includes(q)) return false;
+  return true;
+}
+
+function createProductCard(p){
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.innerHTML = `
+ <div class="img-box">
+  <img src="${p.img}" alt="${p.title}" style="max-height:100%;max-width:100%;object-fit:contain;border-radius:10px">
+  ${p.isNew ? '<div class="new-label">NEW</div>' : ''}
+</div>
+   <div>
+      <div class="title">${p.title}</div>
+      <div class="meta">Категория: ${p.category}</div>
+    </div>
+    <div class="price-row">
+      <div>
+        ${p.discount > 0 ? `<div class="old-price">${formatSum(p.price)}</div>` : ''}
+        <div class="price">${formatSum(calcPriceAfterDiscount(p))}</div>
+      </div>
+      <div style="text-align:right">
+        ${p.discount > 0 ? `<div class="discount">-${p.discount}%</div>` : ''}
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn cart" data-id="${p.id}">В корзину</button>
+      <button class="btn fav" data-id="${p.id}">♡</button>
+    </div>
+  `;
+
+  // ❌ убираем addBtn.onclick = ...
+  // ❌ убираем favBtn.onclick = ...
+
+  // только отметка избранного
+  const favBtn = div.querySelector('.btn.fav');
+  if(favs.find(f=>f.id===p.id)) favBtn.textContent = '♥';
+
+  return div;
+}
+
+
+function renderProducts(){
+  productsGrid.innerHTML = '';
+  const filtered = PRODUCTS.filter(productMatchesFilter);
+  filtered.forEach(p=>{
+    if (p.category !== 'Новинки' && p.isNew !== true) { /* show in main new and discounts separately */ }
+    productsGrid.appendChild(createProductCard(p));
+  });
+}
+
+const shoesGrid = document.getElementById('shoesGrid');
+
+function renderShoes(){
+  shoesGrid.innerHTML = '';
+  // фильтруем только те товары, у которых в названии есть "Туфли"
+  const shoes = PRODUCTS.filter(p => p.title.toLowerCase().includes('туфли'));
+  if(shoes.length === 0){
+    shoesGrid.innerHTML = `<div class="muted">Туфли пока не добавлены</div>`;
+    return;
+  }
+  shoes.forEach(p => shoesGrid.appendChild(createProductCard(p)));
+}
+
+
+function renderDiscounts(){
+  discountsGrid.innerHTML = '';
+  const disc = PRODUCTS.filter(p=>p.discount>0 && productMatchesFilter(p));
+  if(disc.length===0){
+    discountsGrid.innerHTML = `<div class="muted">Скидочные товары не найдены</div>`;
+    return;
+  }
+  disc.forEach(p=> discountsGrid.appendChild(createProductCard(p)));
+}
+function renderAll(){
+  renderCategoryNav();
+  renderProducts();
+  renderShoes();
+  renderDiscounts();
+  renderCounters();
+  renderCartDrawer();
+  renderProfile();
+}
+
+
+
+function renderCounters(){
+  const qty = cart.reduce((s,i)=>s + i.qty, 0);
+  cartCount.textContent = qty;
+  favCount.textContent = favs.length;
+  cashbackAvailable.textContent = formatSum(user.cashback || 0);
+}
+
+/* ========== CART / FAVS ========== */
+function addToCart(id){
+  const product = PRODUCTS.find(p => p.id === id);
+  if(!product) return;
+  const existing = cart.find(item => item.id === id);
+  if(existing) existing.qty += 1;
+  else cart.push({ id: product.id, title: product.title, price: product.price, discount: product.discount, qty: 1 });
+  writeJSON(LS_CART, cart);
+  showCartDrawer();
+  renderAll();
+}
+
+function removeFromCart(id){
+  cart = cart.filter(i=>i.id !== id);
+  writeJSON(LS_CART, cart);
+  renderAll();
+}
+
+function changeQty(id, delta){
+  const it = cart.find(i=>i.id===id);
+  if(!it) return;
+  it.qty = Math.max(1, it.qty + delta);
+  writeJSON(LS_CART, cart);
+  renderAll();
+}
+
+function toggleFav(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p) return;
+  if(favs.find(f=>f.id===id)) favs = favs.filter(x=>x.id!==id);
+  else favs.push({id:p.id,title:p.title,price:p.price,discount:p.discount});
+  writeJSON(LS_FAV, favs);
+}
+
+/* ========== CART DRAWER RENDER ========== */
+let appliedCashback = 0;
+
+function renderCartDrawer(){
+  cartList.innerHTML = '';
+  if(cart.length === 0){
+    cartList.innerHTML = '<div class="muted">Корзина пуста</div>';
+  } else {
+    cart.forEach(item=>{
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'cart-item';
+      const subtotal = Math.round(item.price * (1 - (item.discount||0)/100) * item.qty);
+      itemDiv.innerHTML = `
+        <div style="width:64px;height:64px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center">${item.title.split(' ')[0]}</div>
+        <div style="flex:1">
+          <div style="font-weight:700">${item.title}</div>
+          <div class="muted">${item.qty} x ${formatSum(Math.round(item.price*(1-(item.discount||0)/100)))}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:700">${formatSum(subtotal)}</div>
+          <div style="margin-top:8px" class="qty">
+            <button class="icon-btn" data-action="minus" data-id="${item.id}">−</button>
+            <span style="min-width:22px;display:inline-block;text-align:center">${item.qty}</span>
+            <button class="icon-btn" data-action="plus" data-id="${item.id}">+</button>
+            <div style="margin-top:6px"><button class="underline" data-action="remove" data-id="${item.id}">Удалить</button></div>
+          </div>
+        </div>
+      `;
+      cartList.appendChild(itemDiv);
+    });
+  }
+
+  // attach handlers for qty buttons
+  cartList.querySelectorAll('[data-action]').forEach(btn=>{
+    btn.onclick = (e)=>{
+      const id = +btn.getAttribute('data-id');
+      const action = btn.getAttribute('data-action');
+      if(action === 'plus') changeQty(id, +1);
+      if(action === 'minus') changeQty(id, -1);
+      if(action === 'remove') removeFromCart(id);
+    };
+  });
+
+  // totals
+  const total = cart.reduce((s,i)=> s + Math.round(i.price * (1 - (i.discount||0)/100) * i.qty), 0);
+  cartTotal.textContent = formatSum(total);
+
+  // reset appliedCashback input if bigger than available or bigger than total
+  const maxUse = Math.min(user.cashback || 0, total);
+  if(appliedCashback > maxUse) appliedCashback = maxUse;
+  cashbackUseInput.value = appliedCashback > 0 ? appliedCashback : '';
+  cashbackAvailable.textContent = formatSum(user.cashback || 0);
+}
+
+/* ========== CHECKOUT ========== */
+applyCashbackBtn.onclick = ()=>{
+  const requested = Number(cashbackUseInput.value || 0);
+  const total = cart.reduce((s,i)=> s + Math.round(i.price * (1 - (i.discount||0)/100) * i.qty), 0);
+  const maxUse = Math.min(user.cashback || 0, total);
+  if(requested <= 0){ appliedCashback = 0; alert('Введите сумму кешбэка для использования'); renderCartDrawer(); return; }
+  if(requested > maxUse){ alert('Нельзя использовать больше, чем доступно или сумма заказа'); return; }
+  appliedCashback = Math.round(requested);
+  renderCartDrawer();
+  alert('Кешбэк применён: ' + formatSum(appliedCashback));
+};
+
+function saveCart(cart) {
+  localStorage.setItem('cart', JSON.stringify(cart));
+}
+
+checkoutBtn.addEventListener('click', () => {
+  saveCart(cart);
+  window.location.href = 'checkout.html';
+});
+
+
+
+/* ========== PROFILE ========== */
+function renderProfile() {
+  profileBody.innerHTML = '';
+  const div = document.createElement('div');
+
+  if (user.logged) {
+    div.innerHTML = `
+      <div class="muted">Telegram:</div>
+      <div style="font-weight:700;margin-bottom:8px">
+        ${user.first_name || user.username || 'Пользователь'}
+      </div>
+      <div class="muted">Текущий кешбэк:</div>
+      <div style="font-weight:800;margin-bottom:12px">
+        ${formatSum(user.cashback || 0)}
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="logoutBtn" class="btn" style="background:#eee;color:#000">Выйти</button>
+        <button id="closeProfBtn" class="btn" style="background:var(--brand-dark);color:#fff">Закрыть</button>
+      </div>
+    `;
+    profileBody.appendChild(div);
+
+    document.getElementById('logoutBtn').onclick = () => {
+      user.logged = false;
+      user.first_name = '';
+      user.username = '';
+      user.tg_id = '';
+      writeJSON(LS_USER, user);
+      renderAll();
+      closeProfileModal();
+    };
+    document.getElementById('closeProfBtn').onclick = () => closeProfileModal();
+
+  } else {
+    div.innerHTML = `
+      <div class="muted" style="margin-bottom:10px">
+        Войдите через Telegram, чтобы сохранять заказы и использовать кешбэк
+      </div>
+      <div id="tg-login-btn"></div>
+      <div style="margin-top:12px;text-align:center">
+        <button id="closeProfBtn2" class="btn" style="background:#eee;color:#000;width:100%">Отмена</button>
+      </div>
+    `;
+    profileBody.appendChild(div);
+
+    // Добавляем Telegram login widget динамически
+    const tgScript = document.createElement('script');
+    tgScript.async = true;
+    tgScript.src = "https://telegram.org/js/telegram-widget.js?22";
+    tgScript.setAttribute('data-telegram-login', 'DanceMotionBot'); // замени на имя своего бота без @
+    tgScript.setAttribute('data-size', 'large');
+    tgScript.setAttribute('data-radius', '8');
+    tgScript.setAttribute('data-onauth', 'onTelegramAuth(user)');
+    tgScript.setAttribute('data-request-access', 'write');
+    document.getElementById('tg-login-btn').appendChild(tgScript);
+
+    document.getElementById('closeProfBtn2').onclick = () => closeProfileModal();
+  }
+}
+
+
+/* ========== UI CONTROLS ========== */
+function showCartDrawer(open = true){
+  cartDrawer.classList.toggle('open', open);
+  overlay.style.display = open ? 'block' : 'none';
+  cartDrawer.setAttribute('aria-hidden', !open);
+}
+function closeCartDrawer(){
+  showCartDrawer(false);
+}
+function showProfileModal(open = true){
+  profileModal.classList.toggle('open', open);
+  overlay.style.display = open ? 'block' : 'none';
+}
+function closeProfileModal(){
+  showProfileModal(false);
+  overlay.style.display = 'none';
+  renderAll();
+}
+function showOverlay(show){
+  overlay.style.display = show ? 'block' : 'none';
+}
+
+/* ========== EVENTS ========== */
+cartBtn.onclick = ()=>{ showCartDrawer(true); renderCartDrawer(); };
+closeCart.onclick = ()=>{ closeCartDrawer(); };
+overlay.onclick = ()=>{ closeCartDrawer(); closeProfileModal(); overlay.style.display = 'none'; };
+profileBtn.onclick = ()=>{ renderProfile(); showProfileModal(true); };
+closeProfile.onclick = ()=>{ closeProfileModal(); };
+favBtn.onclick = ()=>{ alert('Избранное:\\n' + (favs.length ? favs.map(f=>f.title).join('\\n') : 'Пусто')) };
+searchInput.oninput = ()=> renderAll();
+shopNowBtn.onclick = ()=> { activeCategory = 'Все'; renderAll(); window.scrollTo({top:260, behavior:'smooth'}); };
+
+/* quick click handlers delegated (for add/fav buttons in product cards since they are generated) */
+document.addEventListener('click', (e)=>{
+  const el = e.target;
+  if(el.matches('.card .btn.cart')){ const id = +el.getAttribute('data-id'); addToCart(id); }
+  if(el.matches('.card .btn.fav')){ const id = +el.getAttribute('data-id'); toggleFav(id); renderAll(); }
+});
+
+/* ========== INIT ========== */
+function init(){
+  // initial render
+  renderAll();
+  // fill products grids (initial)
+  // open cart if there are items? no
+}
+init();
+
+/* ========== TELEGRAM ORDER NOTIFY ========== */
+const TELEGRAM_BOT_TOKEN = '8182609479:AAG7AqcB8naX92u2XlHkxwp9R9IBhEhfoW0';
+const TELEGRAM_CHAT_ID = '8492577684'; // твой chat_id
+
+async function sendOrderToTelegram(orderText) {
+  try {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_CHAT_ID,
+        text: orderText,
+        parse_mode: 'HTML'
+      })
+    });
+  } catch (err) {
+    console.error('Ошибка при отправке заказа в Telegram:', err);
+  }
+}
+
+
+
+window.onTelegramAuth = function(userData) {
+  user.logged = true;
+  user.tg_id = userData.id;
+  user.first_name = userData.first_name;
+  user.username = userData.username;
+  writeJSON(LS_USER, user);
+  alert(`Вы вошли как ${userData.first_name}`);
+  closeProfileModal();
+  renderAll();
+};
+
+
+
+</script>
+
+
+</body>
+</html>

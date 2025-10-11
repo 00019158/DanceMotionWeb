@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Оформление заказа — Dance Motion</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #e3f1fe;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .order-container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 400px;
+      text-align: center;
+    }
+    h2 {
+      color: #004f73;
+      margin-bottom: 20px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #cce4fc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #004f73;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #006c9e;
+    }
+    .message {
+      margin-top: 15px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="order-container">
+    <h2>Оформление заказа</h2>
+    <input type="text" id="name" placeholder="Имя" required>
+    <input type="tel" id="phone" placeholder="Номер телефона (с Telegram)" required>
+    <input type="text" id="city" placeholder="Город" required>
+    <input type="text" id="country" placeholder="Страна" required>
+    <button id="submitOrder">Отправить заказ</button>
+    <p class="message" id="message"></p>
+  </div>
+
+  <script>
+    const TELEGRAM_BOT_TOKEN = '8182609479:AAG7AqcB8naX92u2XlHkxwp9R9IBhEhfoW0';
+    const TELEGRAM_CHAT_ID = '8492577684';
+    const ADMIN_USERNAME = '@dancemotion_uz'; // сюда ссылка, если заказ принят
+
+    const submitBtn = document.getElementById('submitOrder');
+    const messageEl = document.getElementById('message');
+
+    submitBtn.addEventListener('click', async () => {
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const country = document.getElementById('country').value.trim();
+
+      if (!name || !phone || !city || !country) {
+        messageEl.textContent = 'Пожалуйста, заполните все поля.';
+        messageEl.style.color = 'red';
+        return;
+      }
+
+      messageEl.textContent = 'Подождите, заказ подтверждается...';
+      messageEl.style.color = '#004f73';
+
+      const orderMessage = `
+🩵 *Новый заказ Dance Motion!*
+👤 Имя: ${name}
+📞 Телефон: ${phone}
+🏙 Город: ${city}
+🌍 Страна: ${country}
+
+Выберите действие:
+`;
+
+      const inlineKeyboard = {
+        inline_keyboard: [
+          [
+            { text: "✅ Принять", callback_data: "accept" },
+            { text: "❌ Отклонить", callback_data: "reject" }
+          ]
+        ]
+      };
+
+      // отправляем заказ админу
+      const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: orderMessage,
+          parse_mode: "Markdown",
+          reply_markup: inlineKeyboard
+        })
+      });
+
+      if (response.ok) {
+        messageEl.textContent = 'Подождите, заказ подтверждается...';
+      } else {
+        messageEl.textContent = 'Ошибка при отправке заказа.';
+        messageEl.style.color = 'red';
+      }
+
+      // ждём ответа от администратора (имитация)
+      setTimeout(() => {
+        messageEl.innerHTML = `✅ Заказ подтверждён!<br><a href="https://t.me/${ADMIN_USERNAME.replace('@', '')}" target="_blank">Связаться с администратором</a>`;
+        messageEl.style.color = 'green';
+      }, 4000);
+    });
+  </script>
+</body>
+</html>

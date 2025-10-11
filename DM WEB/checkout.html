@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Оформление заказа — Dance Motion</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background-color: #e3f1fe;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .order-container {
+      background: #fff;
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 420px;
+      text-align: center;
+    }
+    h2 {
+      color: #004f73;
+      margin-bottom: 20px;
+    }
+    .cart-summary {
+      text-align: left;
+      background: #f7fbff;
+      border-radius: 10px;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid #cce4fc;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 8px 0;
+      font-size: 15px;
+    }
+    .cart-item:last-child { border-bottom: none; }
+    .item-name { width: 55%; }
+    .item-price { width: 45%; text-align: right; }
+    .total {
+      font-weight: 600;
+      text-align: right;
+      margin-top: 10px;
+      font-size: 16px;
+      color: #004f73;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #cce4fc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #004f73;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #006c9e;
+    }
+    .message {
+      margin-top: 15px;
+      font-weight: 500;
+    }
+    a {
+      color: #004f73;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="order-container">
+    <h2>Оформление заказа</h2>
+
+    <div id="cartContainer" class="cart-summary"></div>
+
+    <input type="text" id="name" placeholder="Имя" required>
+    <input 
+      type="tel" 
+      id="phone" 
+      placeholder="+998 90 123 45 67"
+      maxlength="17"
+      required
+    >
+
+    <input type="text" id="city" placeholder="Город" required>
+    <input type="text" id="country" placeholder="Страна" required>
+
+    <button id="submitOrder">Отправить заказ</button>
+    <p class="message" id="message"></p>
+  </div>
+
+  <script>
+    const TELEGRAM_BOT_TOKEN = '8182609479:AAG7AqcB8naX92u2XlHkxwp9R9IBhEhfoW0';
+    const TELEGRAM_CHAT_ID = '8492577684';
+    const ADMIN_USERNAME = '@dancemotion_uz';
+
+    const cartContainer = document.getElementById('cartContainer');
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // === Отображение корзины ===
+    if (cart.length === 0) {
+      cartContainer.innerHTML = '<p>Корзина пуста 🛍</p>';
+    } else {
+      let total = 0;
+      let html = '';
+
+      cart.forEach(item => {
+        const name = item.name || item.title || item.product || 'Товар';
+        const price = Number(item.price || item.cost || item.amount || 0);
+        const quantity = Number(item.quantity || item.count || item.qty || 1);
+
+        const itemTotal = price * quantity;
+        total += itemTotal;
+
+        html += `
+          <div class="cart-item">
+            <div class="item-name">${name} × ${quantity}</div>
+            <div class="item-price">${itemTotal.toLocaleString()} сум</div>
+          </div>
+        `;
+      });
+
+      html += `<div class="total">Итого: ${total.toLocaleString()} сум</div>`;
+      cartContainer.innerHTML = html;
+    }
+
+    // === Отправка заказа ===
+    document.getElementById('submitOrder').addEventListener('click', async () => {
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const country = document.getElementById('country').value.trim();
+      const messageEl = document.getElementById('message');
+
+      if (!name || !phone || !city || !country) {
+        messageEl.textContent = 'Пожалуйста, заполните все поля.';
+        messageEl.style.color = 'red';
+        return;
+      }
+
+      messageEl.textContent = 'Подождите, заказ отправляется...';
+      messageEl.style.color = '#004f73';
+
+      let total = 0;
+      const orderText = cart.map(i => {
+        const n = i.name || i.title || i.product || 'Товар';
+        const p = Number(i.price || i.cost || i.amount || 0);
+        const q = Number(i.quantity || i.count || i.qty || 1);
+        total += p * q;
+        return `• ${n} × ${q} — ${(p * q).toLocaleString()} сум`;
+      }).join('\n');
+
+      const orderMessage = `
+🩵 *Новый заказ Dance Motion!*
+👤 Имя: ${name}
+📞 Телефон: ${phone}
+🏙 Город: ${city}
+🌍 Страна: ${country}
+
+📦 *Товары:*
+${orderText}
+
+💰 *Итого:* ${total.toLocaleString()} сум
+      `;
+
+      const inlineKeyboard = {
+        inline_keyboard: [
+          [
+            { text: "✅ Принять", callback_data: "accept" },
+            { text: "❌ Отклонить", callback_data: "reject" }
+          ]
+        ]
+      };
+
+      try {
+        const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: orderMessage,
+            parse_mode: "Markdown",
+            reply_markup: inlineKeyboard
+          })
+        });
+
+        if (!response.ok) throw new Error("Ошибка при отправке");
+
+        messageEl.textContent = '✅ Заказ успешно отправлен!';
+        messageEl.style.color = 'green';
+        localStorage.removeItem('cart');
+
+        setTimeout(() => {
+          messageEl.innerHTML = `✅ Заказ подтверждён!<br><a href="https://t.me/${ADMIN_USERNAME.replace('@', '')}" target="_blank">Связаться с администратором</a>`;
+        }, 2000);
+
+      } catch (err) {
+        console.error(err);
+        messageEl.textContent = 'Ошибка при отправке заказа. Попробуйте позже.';
+        messageEl.style.color = 'red';
+      }
+    });
+
+    // === Маска телефона ===
+    const phoneInput = document.getElementById('phone');
+    const messageEl = document.getElementById('message');
+
+    phoneInput.addEventListener('focus', () => {
+      if (!phoneInput.value.startsWith('+998')) {
+        phoneInput.value = '+998 ';
+      }
+    });
+
+    phoneInput.addEventListener('input', () => {
+      let digits = phoneInput.value.replace(/\D/g, '');
+
+      if (!digits.startsWith('998')) digits = '998' + digits;
+      digits = digits.slice(0, 12); // 998 + 9 цифр
+
+      let formatted = '+998';
+      if (digits.length > 3) formatted += ' ' + digits.slice(3, 5);
+      if (digits.length > 5) formatted += ' ' + digits.slice(5, 8);
+      if (digits.length > 8) formatted += ' ' + digits.slice(8, 10);
+      if (digits.length > 10) formatted += ' ' + digits.slice(10, 12);
+
+      phoneInput.value = formatted.trimEnd();
+    });
+
+    document.getElementById('submitOrder').addEventListener('click', (event) => {
+      const digits = phoneInput.value.replace(/\D/g, '');
+      if (digits.length !== 12) {
+        event.preventDefault();
+        messageEl.textContent = 'Введите корректный номер телефона (9 цифр после +998)';
+        messageEl.style.color = 'red';
+      }
+    });
+  </script>
+</body>
+</html>
