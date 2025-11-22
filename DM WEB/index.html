@@ -1,13 +1,14 @@
-<!doctype html>
+
+
+    <!doctype html>
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Dance Motion — магазин</title>
-
-  <!-- Брендовые цвета: -- -->
+  <!-- СТИЛИ ТВОИ (я не менял) -->
   <style>
-    :root{
+   :root{
       --brand-light: #e3f1fe;
       --brand-mid:   #cce4fc;
       --brand-dark:  #004f73;
@@ -225,8 +226,6 @@
     height: auto;
   }
 }
-
-    
   </style>
 </head>
 <body>
@@ -235,8 +234,8 @@
     <header>
       <div class="brand">
         <div class="logo">
-  <img src="/Images/логотип.png" alt="Dance Motion">
-</div>
+          <img src="/Images/логотип.png" alt="Dance Motion">
+        </div>
 
         <div>
           <h1>Dance Motion</h1>
@@ -252,20 +251,20 @@
       </div>
 
      <div class="right-icons">
-  <button id="favBtn" class="icon-btn" title="Избранное">
-    <img src="/Images/Сердце.PNG" alt="Избранное" class="icon-img">
-    <span id="favCount" class="icon-count">0</span>
-  </button>
+      <button id="favBtn" class="icon-btn" title="Избранное">
+        <img src="/Images/Сердце.PNG" alt="Избранное" class="icon-img">
+        <span id="favCount" class="icon-count">0</span>
+      </button>
 
-  <button id="profileBtn" class="icon-btn" title="Профиль">
-    <img src="/Images/Профиль.PNG" alt="Профиль" class="icon-img">
-  </button>
+      <button id="profileBtn" class="icon-btn" title="Профиль">
+        <img src="/Images/Профиль.PNG" alt="Профиль" class="icon-img">
+      </button>
 
-  <button id="cartBtn" class="icon-btn" title="Корзина">
-    <img src="/Images/Корзина.PNG" alt="Корзина" class="icon-img">
-    <span id="cartCount" class="icon-count">0</span>
-  </button>
-</div>
+      <button id="cartBtn" class="icon-btn" title="Корзина">
+        <img src="/Images/Корзина.PNG" alt="Корзина" class="icon-img">
+        <span id="cartCount" class="icon-count">0</span>
+      </button>
+    </div>
 
     </header>
 
@@ -279,41 +278,25 @@
     <button class="cta" id="shopNow">Перейти в каталог</button>
   </div>
 
-  <!-- блок с изображением -->
-  <div style="
-    width: 260px;
-    height: 200px;
-    border-radius: 16px;
-    background: linear-gradient(180deg, var(--brand-mid), #fff);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--shadow);
-    overflow: hidden;
-  ">
+  <div style="width: 260px; height: 200px; border-radius: 16px; background: linear-gradient(180deg, var(--brand-mid), #fff); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); overflow: hidden;">
     <img src="/Images/основа.png" alt="Dance Motion Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 16px;">
   </div>
 </section>
 
-<!-- Каталог всех товаров -->
 <h3 style="margin-top:18px;color:var(--brand-dark)">Каталог</h3>
 <div id="productsGrid" class="grid"></div>
 
-
-    <!-- Туфли -->
- <h3 style="margin-top:18px;color:var(--brand-dark)">Туфли</h3>
+<h3 style="margin-top:18px;color:var(--brand-dark)">Туфли</h3>
 <div id="shoesGrid" class="grid"></div>
 
-    <!-- Скидки -->
-    <h3 style="margin-top:18px;color:var(--brand-dark)">Скидки</h3>
-    <div id="discountsGrid" class="grid"></div>
+<h3 style="margin-top:18px;color:var(--brand-dark)">Скидки</h3>
+<div id="discountsGrid" class="grid"></div>
 
-    <footer>
-      © Dance Motion — Все права защищены. Контакты: +998(91)123-60-66 · Instagram: @dancemotion.uz
-    </footer>
+<footer>
+  © Dance Motion — Все права защищены. Контакты: +998(91)123-60-66 · Instagram: @dancemotion.uz
+</footer>
   </div>
 
-  <!-- overlay -->
   <div id="overlay" class="overlay"></div>
 
   <!-- Cart Drawer -->
@@ -349,449 +332,9 @@
       <button id="closeProfile" class="close-btn">✖</button>
     </div>
 
-    <div id="profileBody" style="margin-top:12px">
-      <!-- content injected by JS -->
-    </div>
+    <div id="profileBody" style="margin-top:12px"></div>
   </div>
 
-  
-
-
-
-<script>
-/* ========== DATA ========== */
-const PRODUCTS = [
-  {id:1,title:'Туфли Рейтинг-Белые (Кожа)',price:350000,category:'Девочкам',discount:0,isNew:true,img:'/images/w3.jpg'},
-  {id:2,title:'Туфли Рейтинг - Светло-Бежевые (Сатин)',price:350000,category:'Девочкам',discount:0,isNew:true,img:'/images/B2.jpg'},
-  {id:3,title:'Туфли Рейтинг - Коричневые (Кожа) ',price:350000,category:'Девочкам',discount:0,isNew:false,img:'/images/B.jpg'},
-  {id:4,title:'Туфли Рейтинг- Красные (Кожа)' ,price:350000,category:'Девочкам',discount:0,isNew:true,img:'/images/R.jpg'},
-  {id:5,title:'Туфли Рейтинг- Черные (Сатин)' ,price:350000,category:'Девочкам',discount:0,isNew:true,img:'/images/BL.jpg'},
-  {id:6,title:'Туфли Рейтинг- Коричневые (Сатин)' ,price:350000,category:'Девочкам',discount:10,isNew:true,img:'/images/BR.jpg'},
-  
-
-
-];
-
-
-
-
-/* ========== STORAGE HELPERS ========== */
-const LS_CART = 'dm_cart_v1';
-const LS_FAV  = 'dm_fav_v1';
-const LS_USER = 'dm_user_v1';
-
-function readJSON(key, fallback){
-  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
-  catch(e){ return fallback; }
-}
-function writeJSON(key, val){
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){}
-}
-
-/* ========== APP STATE ========== */
-let cart = readJSON(LS_CART, []);
-let favs = readJSON(LS_FAV, []);
-let user = readJSON(LS_USER, { logged:false, email:'', cashback:0 });
-
-/* ========== DOM refs ========== */
-const productsGrid = document.getElementById('productsGrid');
-const discountsGrid = document.getElementById('discountsGrid');
-const categoryNav = document.getElementById('categoryNav');
-const searchInput = document.getElementById('searchInput');
-const cartCount = document.getElementById('cartCount');
-const favCount = document.getElementById('favCount');
-const cartBtn = document.getElementById('cartBtn');
-const favBtn = document.getElementById('favBtn');
-const profileBtn = document.getElementById('profileBtn');
-const cartDrawer = document.getElementById('cartDrawer');
-const overlay = document.getElementById('overlay');
-const cartList = document.getElementById('cartList');
-const cartTotal = document.getElementById('cartTotal');
-const cashbackAvailable = document.getElementById('cashbackAvailable');
-const cashbackUseInput = document.getElementById('cashbackUseInput');
-const applyCashbackBtn = document.getElementById('applyCashbackBtn');
-const checkoutBtn = document.getElementById('checkoutBtn');
-const profileModal = document.getElementById('profileModal');
-const profileBody = document.getElementById('profileBody');
-const closeCart = document.getElementById('closeCart');
-const closeProfile = document.getElementById('closeProfile');
-const shopNowBtn = document.getElementById('shopNow');
-
-const categories = ['Все','Женщинам','Мужчинам','Девочкам','Мальчикам','Туфли','Скидки'];
-let activeCategory = 'Все';
-
-/* ========== UTIL ========== */
-function formatSum(v){ return (Math.round(v)).toLocaleString('ru-RU') + ' сум'; }
-function calcPriceAfterDiscount(p){ return Math.round(p.price * (1 - (p.discount||0)/100)); }
-
-/* ========== RENDER ========== */
-function renderCategoryNav(){
-  categoryNav.innerHTML = '';
-  categories.forEach(cat=>{
-    const btn = document.createElement('button');
-    btn.className = 'cat-btn' + (cat === activeCategory ? ' active' : '');
-    btn.textContent = cat;
-    btn.onclick = ()=>{ activeCategory = cat; renderAll(); window.scrollTo({top:220,behavior:'smooth'}) };
-    categoryNav.appendChild(btn);
-  });
-}
-function productMatchesFilter(p){
-  const q = (searchInput.value || '').trim().toLowerCase();
-  if(activeCategory !== 'Все'){
-    if(activeCategory === 'Скидки' && !(p.discount > 0)) return false;
-    if(activeCategory === 'Новинки' && !p.isNew) return false;
-    if(['Женщинам','Мужчинам','Девочкам','Мальчикам'].includes(activeCategory) && p.category !== activeCategory) return false;
-  }
-  if(q && !p.title.toLowerCase().includes(q)) return false;
-  return true;
-}
-
-function createProductCard(p){
-  const div = document.createElement('div');
-  div.className = 'card';
-  div.innerHTML = `
- <div class="img-box">
-  <img src="${p.img}" alt="${p.title}" style="max-height:100%;max-width:100%;object-fit:contain;border-radius:10px">
-  ${p.isNew ? '<div class="new-label">NEW</div>' : ''}
-</div>
-   <div>
-      <div class="title">${p.title}</div>
-      <div class="meta">Категория: ${p.category}</div>
-    </div>
-    <div class="price-row">
-      <div>
-        ${p.discount > 0 ? `<div class="old-price">${formatSum(p.price)}</div>` : ''}
-        <div class="price">${formatSum(calcPriceAfterDiscount(p))}</div>
-      </div>
-      <div style="text-align:right">
-        ${p.discount > 0 ? `<div class="discount">-${p.discount}%</div>` : ''}
-      </div>
-    </div>
-    <div class="actions">
-      <button class="btn cart" data-id="${p.id}">В корзину</button>
-      <button class="btn fav" data-id="${p.id}">♡</button>
-    </div>
-  `;
-
-  // ❌ убираем addBtn.onclick = ...
-  // ❌ убираем favBtn.onclick = ...
-
-  // только отметка избранного
-  const favBtn = div.querySelector('.btn.fav');
-  if(favs.find(f=>f.id===p.id)) favBtn.textContent = '♥';
-
-  return div;
-}
-
-
-function renderProducts(){
-  productsGrid.innerHTML = '';
-  const filtered = PRODUCTS.filter(productMatchesFilter);
-  filtered.forEach(p=>{
-    if (p.category !== 'Новинки' && p.isNew !== true) { /* show in main new and discounts separately */ }
-    productsGrid.appendChild(createProductCard(p));
-  });
-}
-
-const shoesGrid = document.getElementById('shoesGrid');
-
-function renderShoes(){
-  shoesGrid.innerHTML = '';
-  // фильтруем только те товары, у которых в названии есть "Туфли"
-  const shoes = PRODUCTS.filter(p => p.title.toLowerCase().includes('туфли'));
-  if(shoes.length === 0){
-    shoesGrid.innerHTML = `<div class="muted">Туфли пока не добавлены</div>`;
-    return;
-  }
-  shoes.forEach(p => shoesGrid.appendChild(createProductCard(p)));
-}
-
-
-function renderDiscounts(){
-  discountsGrid.innerHTML = '';
-  const disc = PRODUCTS.filter(p=>p.discount>0 && productMatchesFilter(p));
-  if(disc.length===0){
-    discountsGrid.innerHTML = `<div class="muted">Скидочные товары не найдены</div>`;
-    return;
-  }
-  disc.forEach(p=> discountsGrid.appendChild(createProductCard(p)));
-}
-function renderAll(){
-  renderCategoryNav();
-  renderProducts();
-  renderShoes();
-  renderDiscounts();
-  renderCounters();
-  renderCartDrawer();
-  renderProfile();
-}
-
-
-
-function renderCounters(){
-  const qty = cart.reduce((s,i)=>s + i.qty, 0);
-  cartCount.textContent = qty;
-  favCount.textContent = favs.length;
-  cashbackAvailable.textContent = formatSum(user.cashback || 0);
-}
-
-/* ========== CART / FAVS ========== */
-function addToCart(id){
-  const product = PRODUCTS.find(p => p.id === id);
-  if(!product) return;
-  const existing = cart.find(item => item.id === id);
-  if(existing) existing.qty += 1;
-  else cart.push({ id: product.id, title: product.title, price: product.price, discount: product.discount, qty: 1 });
-  writeJSON(LS_CART, cart);
-  showCartDrawer();
-  renderAll();
-}
-
-function removeFromCart(id){
-  cart = cart.filter(i=>i.id !== id);
-  writeJSON(LS_CART, cart);
-  renderAll();
-}
-
-function changeQty(id, delta){
-  const it = cart.find(i=>i.id===id);
-  if(!it) return;
-  it.qty = Math.max(1, it.qty + delta);
-  writeJSON(LS_CART, cart);
-  renderAll();
-}
-
-function toggleFav(id){
-  const p = PRODUCTS.find(x=>x.id===id);
-  if(!p) return;
-  if(favs.find(f=>f.id===id)) favs = favs.filter(x=>x.id!==id);
-  else favs.push({id:p.id,title:p.title,price:p.price,discount:p.discount});
-  writeJSON(LS_FAV, favs);
-}
-
-/* ========== CART DRAWER RENDER ========== */
-let appliedCashback = 0;
-
-function renderCartDrawer(){
-  cartList.innerHTML = '';
-  if(cart.length === 0){
-    cartList.innerHTML = '<div class="muted">Корзина пуста</div>';
-  } else {
-    cart.forEach(item=>{
-      const itemDiv = document.createElement('div');
-      itemDiv.className = 'cart-item';
-      const subtotal = Math.round(item.price * (1 - (item.discount||0)/100) * item.qty);
-      itemDiv.innerHTML = `
-        <div style="width:64px;height:64px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center">${item.title.split(' ')[0]}</div>
-        <div style="flex:1">
-          <div style="font-weight:700">${item.title}</div>
-          <div class="muted">${item.qty} x ${formatSum(Math.round(item.price*(1-(item.discount||0)/100)))}</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-weight:700">${formatSum(subtotal)}</div>
-          <div style="margin-top:8px" class="qty">
-            <button class="icon-btn" data-action="minus" data-id="${item.id}">−</button>
-            <span style="min-width:22px;display:inline-block;text-align:center">${item.qty}</span>
-            <button class="icon-btn" data-action="plus" data-id="${item.id}">+</button>
-            <div style="margin-top:6px"><button class="underline" data-action="remove" data-id="${item.id}">Удалить</button></div>
-          </div>
-        </div>
-      `;
-      cartList.appendChild(itemDiv);
-    });
-  }
-
-  // attach handlers for qty buttons
-  cartList.querySelectorAll('[data-action]').forEach(btn=>{
-    btn.onclick = (e)=>{
-      const id = +btn.getAttribute('data-id');
-      const action = btn.getAttribute('data-action');
-      if(action === 'plus') changeQty(id, +1);
-      if(action === 'minus') changeQty(id, -1);
-      if(action === 'remove') removeFromCart(id);
-    };
-  });
-
-  // totals
-  const total = cart.reduce((s,i)=> s + Math.round(i.price * (1 - (i.discount||0)/100) * i.qty), 0);
-  cartTotal.textContent = formatSum(total);
-
-  // reset appliedCashback input if bigger than available or bigger than total
-  const maxUse = Math.min(user.cashback || 0, total);
-  if(appliedCashback > maxUse) appliedCashback = maxUse;
-  cashbackUseInput.value = appliedCashback > 0 ? appliedCashback : '';
-  cashbackAvailable.textContent = formatSum(user.cashback || 0);
-}
-
-/* ========== CHECKOUT ========== */
-applyCashbackBtn.onclick = ()=>{
-  const requested = Number(cashbackUseInput.value || 0);
-  const total = cart.reduce((s,i)=> s + Math.round(i.price * (1 - (i.discount||0)/100) * i.qty), 0);
-  const maxUse = Math.min(user.cashback || 0, total);
-  if(requested <= 0){ appliedCashback = 0; alert('Введите сумму кешбэка для использования'); renderCartDrawer(); return; }
-  if(requested > maxUse){ alert('Нельзя использовать больше, чем доступно или сумма заказа'); return; }
-  appliedCashback = Math.round(requested);
-  renderCartDrawer();
-  alert('Кешбэк применён: ' + formatSum(appliedCashback));
-};
-
-function saveCart(cart) {
-  localStorage.setItem('cart', JSON.stringify(cart));
-}
-
-checkoutBtn.addEventListener('click', () => {
-  saveCart(cart);
-  window.location.href = 'checkout.html';
-});
-
-
-
-/* ========== PROFILE ========== */
-function renderProfile() {
-  profileBody.innerHTML = '';
-  const div = document.createElement('div');
-
-  if (user.logged) {
-    div.innerHTML = `
-      <div class="muted">Telegram:</div>
-      <div style="font-weight:700;margin-bottom:8px">
-        ${user.first_name || user.username || 'Пользователь'}
-      </div>
-      <div class="muted">Текущий кешбэк:</div>
-      <div style="font-weight:800;margin-bottom:12px">
-        ${formatSum(user.cashback || 0)}
-      </div>
-      <div style="display:flex;gap:8px">
-        <button id="logoutBtn" class="btn" style="background:#eee;color:#000">Выйти</button>
-        <button id="closeProfBtn" class="btn" style="background:var(--brand-dark);color:#fff">Закрыть</button>
-      </div>
-    `;
-    profileBody.appendChild(div);
-
-    document.getElementById('logoutBtn').onclick = () => {
-      user.logged = false;
-      user.first_name = '';
-      user.username = '';
-      user.tg_id = '';
-      writeJSON(LS_USER, user);
-      renderAll();
-      closeProfileModal();
-    };
-    document.getElementById('closeProfBtn').onclick = () => closeProfileModal();
-
-  } else {
-    div.innerHTML = `
-      <div class="muted" style="margin-bottom:10px">
-        Войдите через Telegram, чтобы сохранять заказы и использовать кешбэк
-      </div>
-      <div id="tg-login-btn"></div>
-      <div style="margin-top:12px;text-align:center">
-        <button id="closeProfBtn2" class="btn" style="background:#eee;color:#000;width:100%">Отмена</button>
-      </div>
-    `;
-    profileBody.appendChild(div);
-
-    // Добавляем Telegram login widget динамически
-    const tgScript = document.createElement('script');
-    tgScript.async = true;
-    tgScript.src = "https://telegram.org/js/telegram-widget.js?22";
-    tgScript.setAttribute('data-telegram-login', 'DanceMotionBot'); // замени на имя своего бота без @
-    tgScript.setAttribute('data-size', 'large');
-    tgScript.setAttribute('data-radius', '8');
-    tgScript.setAttribute('data-onauth', 'onTelegramAuth(user)');
-    tgScript.setAttribute('data-request-access', 'write');
-    document.getElementById('tg-login-btn').appendChild(tgScript);
-
-    document.getElementById('closeProfBtn2').onclick = () => closeProfileModal();
-  }
-}
-
-
-/* ========== UI CONTROLS ========== */
-function showCartDrawer(open = true){
-  cartDrawer.classList.toggle('open', open);
-  overlay.style.display = open ? 'block' : 'none';
-  cartDrawer.setAttribute('aria-hidden', !open);
-}
-function closeCartDrawer(){
-  showCartDrawer(false);
-}
-function showProfileModal(open = true){
-  profileModal.classList.toggle('open', open);
-  overlay.style.display = open ? 'block' : 'none';
-}
-function closeProfileModal(){
-  showProfileModal(false);
-  overlay.style.display = 'none';
-  renderAll();
-}
-function showOverlay(show){
-  overlay.style.display = show ? 'block' : 'none';
-}
-
-/* ========== EVENTS ========== */
-cartBtn.onclick = ()=>{ showCartDrawer(true); renderCartDrawer(); };
-closeCart.onclick = ()=>{ closeCartDrawer(); };
-overlay.onclick = ()=>{ closeCartDrawer(); closeProfileModal(); overlay.style.display = 'none'; };
-profileBtn.onclick = ()=>{ renderProfile(); showProfileModal(true); };
-closeProfile.onclick = ()=>{ closeProfileModal(); };
-favBtn.onclick = ()=>{ alert('Избранное:\\n' + (favs.length ? favs.map(f=>f.title).join('\\n') : 'Пусто')) };
-searchInput.oninput = ()=> renderAll();
-shopNowBtn.onclick = ()=> { activeCategory = 'Все'; renderAll(); window.scrollTo({top:260, behavior:'smooth'}); };
-
-/* quick click handlers delegated (for add/fav buttons in product cards since they are generated) */
-document.addEventListener('click', (e)=>{
-  const el = e.target;
-  if(el.matches('.card .btn.cart')){ const id = +el.getAttribute('data-id'); addToCart(id); }
-  if(el.matches('.card .btn.fav')){ const id = +el.getAttribute('data-id'); toggleFav(id); renderAll(); }
-});
-
-/* ========== INIT ========== */
-function init(){
-  // initial render
-  renderAll();
-  // fill products grids (initial)
-  // open cart if there are items? no
-}
-init();
-
-/* ========== TELEGRAM ORDER NOTIFY ========== */
-const TELEGRAM_BOT_TOKEN = '8182609479:AAG7AqcB8naX92u2XlHkxwp9R9IBhEhfoW0';
-const TELEGRAM_CHAT_ID = '8492577684'; // твой chat_id
-
-async function sendOrderToTelegram(orderText) {
-  try {
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_CHAT_ID,
-        text: orderText,
-        parse_mode: 'HTML'
-      })
-    });
-  } catch (err) {
-    console.error('Ошибка при отправке заказа в Telegram:', err);
-  }
-}
-
-
-
-window.onTelegramAuth = function(userData) {
-  user.logged = true;
-  user.tg_id = userData.id;
-  user.first_name = userData.first_name;
-  user.username = userData.username;
-  writeJSON(LS_USER, user);
-  alert(`Вы вошли как ${userData.first_name}`);
-  closeProfileModal();
-  renderAll();
-};
-
-
-
-</script>
-
-
+<script src="/script.js"></script>
 </body>
 </html>
