@@ -17,6 +17,9 @@
     .order-item{padding:8px;border-radius:8px;background:#f7fbff;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
     .muted{color:#6b7280}
     .back{background:#eee;border:0;padding:8px;border-radius:8px}
+    .order-actions{display:flex;gap:8px}
+    .btn-small{padding:6px 10px;border-radius:8px;border:0;background:#e6eef7}
+    .btn-delete{background:#ffd6d6;border:1px solid #ffb3b3}
   </style>
 </head>
 <body>
@@ -34,7 +37,7 @@
           <input id="adminPass" type="password" placeholder="Пароль администратора" />
           <button id="adminLogin">Войти</button>
         </div>
-        <div class="muted">Пароль по умолчанию: <b>admin123</b></div>
+       
       </div>
 
       <div id="adminUI" style="display:none;margin-top:12px">
@@ -105,7 +108,8 @@
   </div>
 
 <script>
-  
+document.addEventListener('DOMContentLoaded', () => {
+
   const PRODUCTS = [
     {id:1,title:'Туфли Рейтинг-Белые (Кожа)',price:350000},
     {id:2,title:'Туфли Рейтинг - Светло-Бежевые (Сатин)',price:350000},
@@ -119,6 +123,7 @@
   const TELEGRAM_CHAT_ID = '8492577684';
   const ADMIN_PASSWORD = 'admin123';
 
+  // DOM
   const loginBlock = document.getElementById('loginBlock');
   const adminUI = document.getElementById('adminUI');
   const adminLogin = document.getElementById('adminLogin');
@@ -137,11 +142,15 @@
   const saveOrderBtn = document.getElementById('saveOrder');
   const refreshListBtn = document.getElementById('refreshList');
   const clearFormBtn = document.getElementById('clearForm');
-  const goHome = document.getElementById('goHome');
 
-  goHome.onclick = ()=> location.href = 'index.html';
+  const goHomeBtn = document.getElementById('back');
+  if (goHomeBtn) goHomeBtn.addEventListener('click', () => location.href = 'index.html');
+
+  function getOrders(){ return JSON.parse(localStorage.getItem(LS_ORDERS) || '[]'); }
+  function saveOrders(list){ localStorage.setItem(LS_ORDERS, JSON.stringify(list)); }
 
   function buildProducts(){
+    if(!productSelect) return;
     productSelect.innerHTML = '';
     PRODUCTS.forEach(p=>{
       const opt = document.createElement('option');
@@ -152,22 +161,24 @@
     productPrice.value = PRODUCTS[0].price;
   }
 
-  productSelect.onchange = ()=> {
-    const p = PRODUCTS.find(x=>x.id == productSelect.value);
-    if(p) productPrice.value = p.price;
-  };
+  if (productSelect) {
+    productSelect.addEventListener('change', ()=> {
+      const p = PRODUCTS.find(x=>x.id == productSelect.value);
+      if(p) productPrice.value = p.price;
+    });
+  }
 
-  adminLogin.onclick = ()=>{
-    if(adminPass.value === ADMIN_PASSWORD){
-      loginBlock.style.display = 'none';
-      adminUI.style.display = 'block';
-      buildProducts();
-      renderOrders();
-    } else alert('❌ Неверный пароль');
-  };
-
-  function getOrders(){ return JSON.parse(localStorage.getItem(LS_ORDERS) || '[]'); }
-  function saveOrders(list){ localStorage.setItem(LS_ORDERS, JSON.stringify(list)); }
+  if (adminLogin) {
+    adminLogin.addEventListener('click', ()=> {
+      if(!adminPass) return alert('Поле пароля отсутствует');
+      if(adminPass.value === ADMIN_PASSWORD){
+        if (loginBlock) loginBlock.style.display = 'none';
+        if (adminUI) adminUI.style.display = 'block';
+        buildProducts();
+        renderOrders();
+      } else alert('❌ Неверный пароль');
+    });
+  }
 
   function generateOrderId(){
     const orders = getOrders();
@@ -186,64 +197,129 @@
       console.log('✅ Telegram уведомление отправлено');
     }catch(e){
       console.error('Ошибка Telegram:', e);
-      alert('Ошибка Telegram!');
     }
   }
 
-  saveOrderBtn.onclick = async ()=>{
-    const pid = +productSelect.value;
-    const product = PRODUCTS.find(p=>p.id===pid);
-    const qty = +productQty.value || 1;
-    const price = +productPrice.value || product.price;
-    const name = orderName.value.trim();
-    const phone = orderPhone.value.trim();
-    const email = orderEmail.value.trim();
-    const note = orderNote.value.trim();
-    const status = orderStatus.value;
+  if (saveOrderBtn) {
+    saveOrderBtn.addEventListener('click', async ()=> {
+      const pid = productSelect ? +productSelect.value : 1;
+      const product = PRODUCTS.find(p=>p.id===pid) || PRODUCTS[0];
+      const qty = productQty ? +productQty.value || 1 : 1;
+      const price = productPrice ? +productPrice.value || product.price : product.price;
+      const name = orderName ? orderName.value.trim() : '';
+      const phone = orderPhone ? orderPhone.value.trim() : '';
+      const email = orderEmail ? orderEmail.value.trim() : '';
+      const note = orderNote ? orderNote.value.trim() : '';
+      const status = orderStatus ? orderStatus.value : 'В обработке';
 
-    if(!name || !phone){ alert('Введите имя и телефон'); return; }
+      if(!name || !phone){ alert('Введите имя и телефон'); return; }
 
-    let id = orderIdInput.value.trim();
-    if(!id) id = generateOrderId(); else id = +id;
+      let id = orderIdInput ? orderIdInput.value.trim() : '';
+      if(!id) id = generateOrderId(); else id = +id;
 
-    const orders = getOrders();
-    const existing = orders.findIndex(o => o.id === id);
-    const now = Date.now();
-    const orderData = {
-      id, name, phone, email, note, status,
-      items:[{id:pid, title:product.title, price, qty}],
-      total:price*qty, updatedAt:now, createdAt:now
-    };
+      const orders = getOrders();
+      const existing = orders.findIndex(o => o.id === id);
+      const now = Date.now();
+      const orderData = {
+        id, name, phone, email, note, status,
+        items:[{id:pid, title:product.title, price, qty}],
+        total:price*qty, updatedAt:now, createdAt: now
+      };
 
-    if(existing >= 0) orders[existing] = orderData;
-    else orders.push(orderData);
-    saveOrders(orders);
+      if(existing >= 0) orders[existing] = orderData;
+      else orders.push(orderData);
+      saveOrders(orders);
 
-    await sendTelegram(`📝 Обновлён заказ #${id}\nИмя: ${name}\nТел: ${phone}\nСтатус: ${status}\nТовар: ${product.title} ×${qty}\nСумма: ${(price*qty).toLocaleString()} сум`);
-    alert('✅ Заказ сохранён!');
-    renderOrders();
-  };
-
-  function renderOrders(){
-    const list = getOrders().reverse();
-    ordersList.innerHTML = list.map(o=>`
-      <div class="order-item">
-        <div><b>ID ${o.id}</b> — ${o.name} — ${o.status}</div>
-        <button onclick="window.open('order.html?id=${o.id}','_blank')">Открыть</button>
-      </div>`).join('') || '<div class="muted">Пока нет заказов</div>';
+      await sendTelegram(`📝 Обновлён заказ #${id}\nИмя: ${name}\nТел: ${phone}\nСтатус: ${status}\nТовар: ${product.title} ×${qty}\nСумма: ${(price*qty).toLocaleString()} сум`);
+      alert('✅ Заказ сохранён!');
+      renderOrders();
+    });
   }
 
-  refreshListBtn.onclick = renderOrders;
-  clearFormBtn.onclick = ()=> {
-    orderIdInput.value = '';
-    orderName.value = '';
-    orderPhone.value = '';
-    orderEmail.value = '';
-    orderNote.value = '';
-    orderStatus.value = 'В обработке';
-  };
+  // Открыть заказ в форме для редактирования
+  function openOrder(id){
+    const orders = getOrders();
+    const o = orders.find(x=>x.id === +id);
+    if(!o){ alert('Заказ не найден'); return; }
+    // заполняем поля
+    if(orderIdInput) orderIdInput.value = o.id;
+    if(orderName) orderName.value = o.name || '';
+    if(orderPhone) orderPhone.value = o.phone || '';
+    if(orderEmail) orderEmail.value = o.email || '';
+    if(orderNote) orderNote.value = o.note || '';
+    if(orderStatus) orderStatus.value = o.status || 'В обработке';
+    // если в заказе есть товар — установить в селекте и цену/кол-во
+    const firstItem = (o.items && o.items[0]) || null;
+    if(firstItem && productSelect){
+      productSelect.value = firstItem.id;
+      productPrice.value = firstItem.price;
+      if(productQty) productQty.value = firstItem.qty;
+    }
+    // показать панель (если скрыта) и прокрутить к форме
+    if(loginBlock) loginBlock.style.display = 'none';
+    if(adminUI) {
+      adminUI.style.display = 'block';
+      adminUI.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  }
 
+  // Удалить заказ
+  function deleteOrder(id){
+    if(!confirm(`Удалить заказ #${id}? Это действие нельзя отменить.`)) return;
+    let orders = getOrders();
+    orders = orders.filter(o => o.id !== +id);
+    saveOrders(orders);
+    renderOrders();
+  }
 
+  // Рендер списка заказов с кнопками Открыть и Удалить
+  function renderOrders(){
+    const list = getOrders().slice().reverse();
+    if(!ordersList) return;
+    if(list.length === 0){
+      ordersList.innerHTML = '<div class="muted">Пока нет заказов</div>';
+      return;
+    }
+    ordersList.innerHTML = list.map(o=>`
+      <div class="order-item">
+        <div><b>ID ${o.id}</b> — ${o.name || '—'} — ${o.status || '—'}</div>
+        <div class="order-actions">
+          <button class="btn-small open-btn" data-id="${o.id}">Открыть</button>
+          <button class="btn-small btn-delete" data-id="${o.id}">Удалить</button>
+        </div>
+      </div>`
+    ).join('');
+  }
+
+  // Делегируем клики по списку заказов
+  if(ordersList){
+    ordersList.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      const id = btn.getAttribute('data-id');
+      if(!id) return;
+      if(btn.classList.contains('open-btn')) {
+        openOrder(id);
+      } else if(btn.classList.contains('btn-delete')) {
+        deleteOrder(id);
+      }
+    });
+  }
+
+  if (refreshListBtn) refreshListBtn.addEventListener('click', renderOrders);
+  if (clearFormBtn) clearFormBtn.addEventListener('click', ()=> {
+    if(orderIdInput) orderIdInput.value = '';
+    if(orderName) orderName.value = '';
+    if(orderPhone) orderPhone.value = '';
+    if(orderEmail) orderEmail.value = '';
+    if(orderNote) orderNote.value = '';
+    if(orderStatus) orderStatus.value = 'В обработке';
+    if(productSelect) productSelect.selectedIndex = 0;
+    if(productPrice) productPrice.value = (PRODUCTS[0] && PRODUCTS[0].price) || '';
+    if(productQty) productQty.value = 1;
+  });
+
+});
 </script>
 </body>
 </html>
