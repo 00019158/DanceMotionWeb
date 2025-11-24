@@ -9,14 +9,49 @@
 const TELEGRAM_BOT_TOKEN = '8182609479:AAG7AqcB8naX92u2XlHkxwp9R9IBhEhfoW0';
 const TELEGRAM_CHAT_ID  = '8492577684';
 
-/* ========== DATA (каталог) ========== */
+/* ========== DATA (каталог) ==========
+   Добавлена property `collection` чтобы товары попадали в фильтры:
+   'Рейтинг','Стандартные','Латинские','Аксессуары' (и т.д.)
+*/
 const PRODUCTS = [
-  {id:1,title:'Туфли Рейтинг-Белые (Кожа)',price:350000,category:'Девочкам',discount:0,isNew:true,img:'/images/w3.jpg'},
-  {id:2,title:'Туфли Рейтинг - Светло-Бежевые (Сатин)',price:350000,category:'Девочкам',discount:0,isNew:true,img:'/images/B2.jpg'},
-  {id:3,title:'Туфли Рейтинг - Коричневые (Кожа)',price:350000,category:'Девочкам',discount:0,isNew:false,img:'/images/B.jpg'},
-  {id:4,title:'Туфли Рейтинг- Красные (Кожа)',price:350000,category:'Девочкам',discount:0,isNew:true,img:'/images/R.jpg'},
-  {id:5,title:'Туфли Рейтинг- Черные (Сатин)',price:350000,category:'Девочкам',discount:0,isNew:true,img:'/images/BL.jpg'},
-  {id:6,title:'Туфли Рейтинг- Коричневые (Сатин)',price:350000,category:'Девочкам',discount:10,isNew:true,img:'/images/BR.jpg'},
+  {id:1, title:'Туфли Рейтинг с ремешками - Белые (Кожа)', price:350000, category:'Девочкам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/w3.jpg'},
+  {id:2, title:'Туфли Рейтинг с ремешками - Светло-Бежевые (Сатин)', price:350000, category:'Девочкам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/B2.jpg'},
+  {id:3, title:'Туфли Рейтинг с ремешками - Коричневые (Кожа)', price:350000, category:'Девочкам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:false, img:'/images/B.jpg'},
+  {id:4, title:'Туфли Рейтинг с ремешками - Красные (Кожа)', price:350000, category:'Девочкам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/R.jpg'},
+  {id:5, title:'Туфли Рейтинг с ремешками - Черные (Сатин)', price:350000, category:'Девочкам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/BL.jpg'},
+  {id:6, title:'Туфли Рейтинг с ремешками - Коричневые (Сатин)', price:350000, category:'Девочкам', collection:'Рейтинг', type:'Туфли', discount:10, isNew:true, img:'/images/BR.jpg'},
+
+  {id:7, title:'Согревающие Чуни (Серые)', price:350000, category:'Женщинам', collection:'Аксессуары', type:'Чуни', discount:0, isNew:true, img:'/images/S.png'},
+  {id:8, title:'Согревающие Чуни (Небесно-голубой)', price:250000, category:'Женщинам', collection:'Аксессуары', type:'Чуни', discount:0, isNew:true, img:'/images/BCH.png'},
+  {id:9, title:'Согревающие Чуни (Темно-Фиолетовые)', price:250000, category:'Женщинам', collection:'Аксессуары', type:'Чуни', discount:0, isNew:true, img:'/images/FCH.PNG'},
+  {id:10, title:'Согревающие Чуни (Черные)', price:250000, category:'Женщинам', collection:'Аксессуары', type:'Чуни', discount:0, isNew:true, img:'/images/BLCH.PNG'},
+  {id:11, title:'Согревающие Чуни (Градиент)', price:250000, category:'Женщинам', collection:'Аксессуары', type:'Чуни', discount:0, isNew:true, img:'/images/GCH.PNG'},
+  {id:12, title:'Согревающие Чуни (Розовые)', price:250000, category:'Женщинам', collection:'Аксессуары', type:'Чуни', discount:0, isNew:true, img:'/images/PCH.png'},
+
+  {id:13, title:'Стандартные туфли - (Шампань)', price:350000, category:'Женщинам', collection:'Стандартные', type:'Туфли', discount:0, isNew:true, img:'/images/SHST.PNG'},
+  {id:14, title:'Стандартные туфли - (Белые)', price:350000, category:'Женщинам', collection:'Стандартные', type:'Туфли', discount:0, isNew:true, img:'/images/WHST.PNG'},
+  {id:15, title:'Стандартные туфли - (Сатин)', price:350000, category:'Женщинам', collection:'Стандартные', type:'Туфли', discount:0, isNew:true, img:'/images/SST.PNG'},
+
+  {id:16, title:'Латинские туфли - (Светло-Бежевые)', price:350000, category:'Женщинам', collection:'Латинские', type:'Туфли', discount:0, isNew:true, img:'/images/GLT.PNG'},
+  {id:17, title:'Латинские туфли - (Черные)', price:350000, category:'Женщинам', collection:'Латинские', type:'Туфли', discount:0, isNew:true, img:'/images/BLT.PNG'},
+  {id:18, title:'Латинские туфли - (Сатин)', price:350000, category:'Женщинам', collection:'Латинские', type:'Туфли', discount:0, isNew:true, img:'/images/SLT.PNG'},
+  {id:19, title:'Латинские туфли - (Шампань)', price:350000, category:'Женщинам', collection:'Латинские', type:'Туфли', discount:0, isNew:true, img:'/images/SHLT.PNG'},
+  {id:20, title:'Латинские туфли - (Градиент)', price:350000, category:'Женщинам', collection:'Латинские', type:'Туфли', discount:0, isNew:true, img:'/images/GRLT.PNG'},
+
+  {id:21, title:'Тренировочные туфли (Золотые Поцелуи)', price:350000, category:'Женщинам', collection:'Стандартные', type:'Тренировочные', discount:0, isNew:true, img:'/images/GT.PNG'},
+  {id:22, title:'Тренировочные туфли (Красные Поцелуи)', price:350000, category:'Женщинам', collection:'Стандартные', type:'Тренировочные', discount:0, isNew:true, img:'/images/RT.PNG'},
+  {id:23, title:'Тренировочные туфли (Градиентовые Поцелуи)', price:350000, category:'Женщинам', collection:'Стандартные', type:'Тренировочные', discount:0, isNew:true, img:'/images/GRT.PNG'},
+
+  {id:24, title:'Туфли Рейтинг - (Сатин)', price:350000, category:'Женщинам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/SR.PNG'},
+  {id:25, title:'Туфли Рейтинг - (Белые)', price:350000, category:'Женщинам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/WHR.PNG'},
+  {id:26, title:'Туфли Рейтинг - (Черные)', price:350000, category:'Женщинам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/BRT.PNG'},
+  {id:27, title:'Туфли Рейтинг плетение - (Персиковые)', price:350000, category:'Женщинам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/PR.PNG'},
+  {id:28, title:'Туфли Рейтинг плетение - (Белые)', price:350000, category:'Женщинам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/WHRT.PNG'},
+  {id:29, title:'Туфли Рейтинг - (Черные)', price:350000, category:'Женщинам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/BLRT.PNG'},
+
+  {id:30, title:'Гетры - (Черные)', price:120000, category:'Женщинам', collection:'Аксессуары', type:'Гетры', discount:0, isNew:true, img:'/images/GET.PNG'},
+  {id:31, title:'Гетры - (Белые)', price:120000, category:'Женщинам', collection:'Аксессуары', type:'Гетры', discount:0, isNew:true, img:'/images/GETWH.PNG'},
+  {id:32, title:'Гетры - (Фирменный цвет DanceMotion)', price:120000, category:'Женщинам', collection:'Аксессуары', type:'Гетры', discount:0, isNew:true, img:'/images/GETB.PNG'},
 ];
 
 /* ========== STORAGE KEYS ========== */
@@ -38,7 +73,6 @@ let user = readJSON(LS_USER, { logged:false, name:'', phone:'', id:null, cashbac
 
 /* ========== DOM refs (index.html) - guard на случай если файл подключён на другой странице */ 
 const productsGrid   = document.getElementById('productsGrid');
-const shoesGrid      = document.getElementById('shoesGrid');
 const discountsGrid  = document.getElementById('discountsGrid');
 const categoryNav    = document.getElementById('categoryNav');
 const searchInput    = document.getElementById('searchInput');
@@ -64,8 +98,11 @@ const applyCashbackBtnEl  = document.getElementById('applyCashbackBtn');
 
 const shopNowBtn     = document.getElementById('shopNow');
 
-/* categories list and active */
-const categories = ['Все','Женщинам','Мужчинам','Девочкам','Мальчикам','Туфли','Скидки'];
+/* categories list and active
+   Здесь финальный набор кнопок, который вы просили:
+   Все, Женщинам, Девочкам, Мальчикам, Рейтинг, Стандартные, Латинские, Аксессуары, Скидки
+*/
+const categories = ['Все','Женщинам','Девочкам','Мальчикам','Рейтинг','Стандартные','Латинские','Аксессуары','Скидки'];
 let activeCategory = 'Все';
 
 /* ========== RENDER FUNCTIONS ========== */
@@ -80,27 +117,51 @@ function renderCategoryNav(){
     categoryNav.appendChild(btn);
   });
 }
+
+/* Фильтрация товаров по activeCategory и поиску */
 function productMatchesFilter(p){
   const q = (searchInput && searchInput.value || '').trim().toLowerCase();
+
   if(activeCategory !== 'Все'){
     if(activeCategory === 'Скидки' && !(p.discount > 0)) return false;
-    if(activeCategory === 'Новинки' && !p.isNew) return false;
-    if(['Женщинам','Мужчинам','Девочкам','Мальчикам'].includes(activeCategory) && p.category !== activeCategory) return false;
+
+    // фильтры по полу/категории (Женщинам/Девочкам/Мальчикам)
+    if(['Женщинам','Девочкам','Мальчикам'].includes(activeCategory)){
+      if(p.category !== activeCategory) return false;
+    }
+
+    // фильтры по коллекциям
+    if(['Рейтинг','Стандартные','Латинские','Аксессуары'].includes(activeCategory)){
+      if((p.collection || '').toLowerCase() !== activeCategory.toLowerCase()) return false;
+    }
   }
-  if(q && !p.title.toLowerCase().includes(q)) return false;
+
+  // поиск по title / category / type / collection
+  if(q){
+    const hay = (((p.title || '') + ' ' + (p.category || '') + ' ' + (p.type || '') + ' ' + (p.collection || '')).toLowerCase());
+    if(!hay.includes(q)) return false;
+  }
+
   return true;
 }
+
 function createProductCard(p){
   const div = document.createElement('div');
   div.className = 'card';
+  // dataset для возможного использования в фильтрах/отладке
+  div.dataset.id = p.id;
+  if(p.category) div.dataset.category = p.category;
+  if(p.collection) div.dataset.collection = p.collection;
+  if(p.discount && p.discount > 0) div.dataset.discount = 'true';
+
   div.innerHTML = `
     <div class="img-box">
-      <img src="${p.img}" alt="${p.title}" style="max-height:100%;max-width:100%;object-fit:contain;border-radius:10px">
+      <img src="${p.img}" alt="${escapeHtml(p.title)}" style="max-height:100%;max-width:100%;object-fit:contain;border-radius:10px">
       ${p.isNew ? '<div class="new-label">NEW</div>' : ''}
     </div>
     <div>
-      <div class="title">${p.title}</div>
-      <div class="meta">Категория: ${p.category}</div>
+      <div class="title">${escapeHtml(p.title)}</div>
+      <div class="meta">Категория: ${escapeHtml(p.category || '')} ${p.collection ? '• ' + escapeHtml(p.collection) : ''}</div>
     </div>
     <div class="price-row">
       <div>
@@ -118,19 +179,25 @@ function createProductCard(p){
   `;
   return div;
 }
+
+/* простая защита от XSS для title/meta */
+function escapeHtml(s){
+  return String(s || '').replace(/[&<>"']/g, function(m){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
+  });
+}
+
 function renderProducts(){
   if(!productsGrid) return;
   productsGrid.innerHTML = '';
   const filtered = PRODUCTS.filter(productMatchesFilter);
+  if(filtered.length === 0){
+    productsGrid.innerHTML = `<div class="muted">Нет товаров по этому фильтру</div>`;
+    return;
+  }
   filtered.forEach(p => productsGrid.appendChild(createProductCard(p)));
 }
-function renderShoes(){
-  if(!shoesGrid) return;
-  shoesGrid.innerHTML = '';
-  const shoes = PRODUCTS.filter(p => p.title.toLowerCase().includes('туфли'));
-  if(shoes.length === 0) { shoesGrid.innerHTML = `<div class="muted">Туфли пока не добавлены</div>`; return; }
-  shoes.forEach(p => shoesGrid.appendChild(createProductCard(p)));
-}
+
 function renderDiscounts(){
   if(!discountsGrid) return;
   discountsGrid.innerHTML = '';
@@ -138,11 +205,13 @@ function renderDiscounts(){
   if(disc.length === 0) { discountsGrid.innerHTML = `<div class="muted">Скидочные товары не найдены</div>`; return; }
   disc.forEach(p => discountsGrid.appendChild(createProductCard(p)));
 }
+
 function renderCounters(){
   if(cartCountEl) cartCountEl.textContent = cart.reduce((s,i)=> s + i.qty, 0);
   if(favCountEl) favCountEl.textContent = favs.length;
   if(cashbackAvailableEl) cashbackAvailableEl.textContent = formatSum(user.cashback || 0);
 }
+
 function renderCartDrawer(){
   if(!cartList) return;
   cartList.innerHTML = '';
@@ -154,9 +223,9 @@ function renderCartDrawer(){
       const itemDiv = document.createElement('div');
       itemDiv.className = 'cart-item';
       itemDiv.innerHTML = `
-        <div style="width:64px;height:64px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center">${item.title.split(' ')[0]}</div>
+        <div style="width:64px;height:64px;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center">${escapeHtml(String(item.title).split(' ')[0])}</div>
         <div style="flex:1">
-          <div style="font-weight:700">${item.title}</div>
+          <div style="font-weight:700">${escapeHtml(item.title)}</div>
           <div class="muted">${item.qty} x ${formatSum(Math.round(item.price*(1-(item.discount||0)/100)))}</div>
         </div>
         <div style="text-align:right">
@@ -226,9 +295,9 @@ function renderProfile(){
   if(user.logged && user.id){
     div.innerHTML = `
       <div class="muted">Вас приветствует:</div>
-      <div style="font-weight:700;margin-bottom:8px">${user.name || user.phone || 'Пользователь'}</div>
+      <div style="font-weight:700;margin-bottom:8px">${escapeHtml(user.name || user.phone || 'Пользователь')}</div>
       <div class="muted">Ваш ID:</div>
-      <div style="font-weight:800;margin-bottom:12px">${user.id}</div>
+      <div style="font-weight:800;margin-bottom:12px">${escapeHtml(String(user.id))}</div>
       <div style="display:flex;gap:8px">
         <button id="logoutBtn" class="btn" style="background:#eee;color:#000">Выйти</button>
         <button id="goOrder" class="btn" style="background:var(--brand-dark);color:#fff">Мой заказ</button>
@@ -350,9 +419,7 @@ async function sendTelegramMessage(text, parseMode = 'HTML') {
   }
 }
 
-
 /* ========== Public API for checkout/admin/order pages ========== */
-
 /**
  * placeOrder(orderData)
  * orderData: { name, phone, city, country, items: [{id,title,qty,price,discount}], note(optional) }
@@ -390,7 +457,6 @@ window.placeOrder = async function(orderData){
   }
 };
 
-
 // внутренняя функция для работы с localStorage
 function _saveOrderInternal(order) {
   const orders = readJSON(LS_ORDERS, []);
@@ -400,12 +466,9 @@ function _saveOrderInternal(order) {
   writeJSON(LS_ORDERS, orders);
 }
 
-
-
-
 window.saveOrder = function(order){
   if(!order || !order.id) throw new Error('order.id required');
-  _saveOrderInternal(order); // ✅ теперь вызывает безопасную внутреннюю функцию
+  _saveOrderInternal(order);
   return { ok:true };
 };
 
@@ -428,7 +491,6 @@ window.updateOrderStatus = async function(id, status){
   await sendTelegramMessage(msg, 'HTML');
   return { ok:true };
 };
-
 
 /* ========== Checkout redirect (index -> checkout.html) ========== */
 if(checkoutBtnEl) {
@@ -481,7 +543,6 @@ if(shopNowBtn) shopNowBtn.onclick = ()=> { activeCategory = 'Все'; renderAll(
 function renderAll(){
   renderCategoryNav();
   renderProducts();
-  renderShoes();
   renderDiscounts();
   renderCounters();
   renderCartDrawer();
