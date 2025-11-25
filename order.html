@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Мой заказ — Dance Motion</title>
+  <style>
+    body{font-family:Inter,Arial;background:#e3f1fe;margin:0;padding:20px;display:flex;align-items:flex-start;justify-content:center}
+    .wrap{width:920px;max-width:95%}
+    .top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+    .back{background:#fff;border-radius:8px;padding:8px 12px;border:0;cursor:pointer}
+    .card{background:#fff;padding:18px;border-radius:12px;box-shadow:0 6px 20px rgba(2,6,23,0.06)}
+    .status-line{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:16px}
+    .step{flex:1;text-align:center;padding:10px;border-radius:10px;background:#f4fbff;position:relative;transition:transform .3s}
+    .step.active{background:linear-gradient(90deg,#cce4fc,#e3f6ff);transform:scale(1.03)}
+    .step .dot{width:28px;height:28px;border-radius:50%;background:#fff;border:3px solid #cce4fc;margin:0 auto;line-height:22px;font-weight:700}
+    .item-list{margin-top:14px}
+    .item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eef7ff}
+    .muted{color:#6b7280}
+    @media(max-width:600px){ .status-line{flex-direction:column;gap:8px} }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <button class="back" id="back">← Назад</button>
+      <h2>Статус заказа</h2>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div class="muted">Ваш ID</div>
+          <div id="orderId" style="font-weight:800;font-size:18px">—</div>
+        </div>
+        <div>
+          <div class="muted">Статус</div>
+          <div id="orderStatus" style="font-weight:800;color:#004f73">—</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <input id="inputId" placeholder="Введите ID заказа" style="padding:8px;border-radius:8px;border:1px solid #e6eef7;width:100%" />
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button id="loadBtn" style="flex:1;padding:10px;border-radius:8px;border:0;background:#004f73;color:#fff">Показать</button>
+          <button id="autoOpenAdmin" style="flex:1;padding:10px;border-radius:8px;border:0;background:#eee">Админ</button>
+        </div>
+      </div>
+
+      <div class="status-line" id="statusLine">
+        <div class="step" data-step="1">
+          <div class="dot">1</div>
+          <div>В обработке</div>
+        </div>
+        <div class="step" data-step="2">
+          <div class="dot">2</div>
+          <div>Формируется</div>
+        </div>
+        <div class="step" data-step="3">
+          <div class="dot">3</div>
+          <div>В доставке</div>
+        </div>
+        <div class="step" data-step="4">
+          <div class="dot">4</div>
+          <div>Получено</div>
+        </div>
+      </div>
+
+      <div class="item-list" id="items"></div>
+      <div style="margin-top:12px" class="muted">Примечание: <span id="noteText">—</span></div>
+      <div style="margin-top:12px" id="updated" class="muted"></div>
+    </div>
+  </div>
+
+<script>
+  const LS_ORDERS = 'dm_orders_v1';
+  const back = document.getElementById('back');
+  const inputId = document.getElementById('inputId');
+  const loadBtn = document.getElementById('loadBtn');
+  const orderIdEl = document.getElementById('orderId');
+  const orderStatusEl = document.getElementById('orderStatus');
+  const itemsEl = document.getElementById('items');
+  const noteText = document.getElementById('noteText');
+  const updatedEl = document.getElementById('updated');
+  const statusLine = document.getElementById('statusLine');
+
+  back.onclick = ()=> history.back();
+  document.getElementById('autoOpenAdmin').onclick = ()=> window.location.href='admin.html';
+
+  function getOrders(){ return JSON.parse(localStorage.getItem(LS_ORDERS) || '[]'); }
+  function renderSteps(stepIndex){
+    const steps = document.querySelectorAll('.step');
+    steps.forEach(s=>{
+      if(+s.getAttribute('data-step') <= stepIndex) s.classList.add('active'); else s.classList.remove('active');
+    });
+  }
+
+  function loadById(id){
+    const orders = getOrders();
+    const ord = orders.find(o=> String(o.id) === String(id));
+    if(!ord){ alert('Заказ не найден'); return; }
+    orderIdEl.textContent = ord.id;
+    orderStatusEl.textContent = ord.status;
+    // render items
+    itemsEl.innerHTML = '';
+    ord.items.forEach(it=>{
+      const div = document.createElement('div'); div.className='item';
+      div.innerHTML = `<div>${it.title} × ${it.qty}</div><div>${(it.price*it.qty).toLocaleString()} сум</div>`;
+      itemsEl.appendChild(div);
+    });
+    noteText.textContent = ord.note || '-';
+    updatedEl.textContent = 'Последнее обновление: ' + (new Date(ord.updatedAt || ord.createdAt || Date.now())).toLocaleString();
+    const mapping = { 'В обработке':1, 'Формируется':2, 'В доставке':3, 'Получено':4 };
+    renderSteps(mapping[ord.status] || 1);
+  }
+
+  loadBtn.onclick = ()=> {
+    const id = inputId.value.trim();
+    if(!id) return alert('Введите ID');
+    loadById(id);
+  };
+
+  // if ?id=... in URL, auto-load
+  const params = new URLSearchParams(location.search);
+  if(params.get('id')) {
+    inputId.value = params.get('id');
+    loadById(params.get('id'));
+  }
+</script>
+</body>
+</html>

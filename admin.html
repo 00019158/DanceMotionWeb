@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin — Dance Motion</title>
+  <style>
+    body{font-family:Inter,Arial;background:#e3f1fe;margin:0;padding:20px}
+    .wrap{max-width:980px;margin:0 auto}
+    .card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 6px 20px rgba(2,6,23,0.06)}
+    .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    input,select,textarea,button{padding:8px;border-radius:8px;border:1px solid #e6eef7;box-sizing:border-box}
+    button{cursor:pointer}
+    .row{display:flex;gap:8px;margin:8px 0}
+    .col{flex:1}
+    .orders{margin-top:12px}
+    .order-item{padding:8px;border-radius:8px;background:#f7fbff;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+    .muted{color:#6b7280}
+    .back{background:#eee;border:0;padding:8px;border-radius:8px}
+    .order-actions{display:flex;gap:8px}
+    .btn-small{padding:6px 10px;border-radius:8px;border:0;background:#e6eef7}
+    .btn-delete{background:#ffd6d6;border:1px solid #ffb3b3}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <h2>Админ-панель</h2>
+      <div>
+        <button id="back" class="back">← Назад в магазин</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div id="loginBlock">
+        <div class="row">
+          <input id="adminPass" type="password" placeholder="Пароль администратора" />
+          <button id="adminLogin">Войти</button>
+        </div>
+       
+      </div>
+
+      <div id="adminUI" style="display:none;margin-top:12px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="flex:1">
+            <label class="muted">ID заказа (пусто — новый)</label>
+            <input id="orderId" placeholder="ID (авто)" />
+          </div>
+          <div style="flex:1">
+            <label class="muted">Email клиента</label>
+            <input id="orderEmail" placeholder="client@example.com" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <label class="muted">Выберите товар</label>
+            <select id="productSelect"></select>
+          </div>
+          <div style="width:120px">
+            <label class="muted">Кол-во</label>
+            <input id="productQty" type="number" value="1" min="1" />
+          </div>
+          <div style="width:150px">
+            <label class="muted">Цена (сум)</label>
+            <input id="productPrice" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <label class="muted">Имя клиента</label>
+            <input id="orderName" />
+          </div>
+          <div class="col">
+            <label class="muted">Телефон</label>
+            <input id="orderPhone" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <label class="muted">Примечание</label>
+            <input id="orderNote" />
+          </div>
+          <div style="width:220px">
+            <label class="muted">Статус</label>
+            <select id="orderStatus">
+              <option>В обработке</option>
+              <option>Формируется</option>
+              <option>В доставке</option>
+              <option>Получено</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="saveOrder" style="background:#004f73;color:#fff">Создать / Обновить заказ</button>
+          <button id="clearForm">Очистить</button>
+          <button id="refreshList">Обновить список</button>
+        </div>
+
+        <div class="orders" id="ordersList" style="margin-top:10px"></div>
+
+        <div style="margin-top:10px" class="muted">При изменении статуса админ получает Telegram-уведомление.</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const PRODUCTS = [
+    {id:1,title:'Туфли Рейтинг-Белые (Кожа)',price:350000},
+    {id:2,title:'Туфли Рейтинг - Светло-Бежевые (Сатин)',price:350000},
+    {id:3,title:'Туфли Рейтинг - Коричневые (Кожа)',price:350000},
+    {id:4,title:'Туфли Рейтинг- Красные (Кожа)',price:350000},
+    {id:5,title:'Туфли Рейтинг- Черные (Сатин)',price:350000},
+    {id:6,title:'Туфли Рейтинг- Коричневые (Сатин)',price:350000},
+  ];
+  const LS_ORDERS = 'dm_orders_v1';
+  const TELEGRAM_BOT_TOKEN = '8182609479:AAG7AqcB8naX92u2XlHkxwp9R9IBhEhfoW0';
+  const TELEGRAM_CHAT_ID = '8492577684';
+  const ADMIN_PASSWORD = 'admin123';
+
+  // DOM
+  const loginBlock = document.getElementById('loginBlock');
+  const adminUI = document.getElementById('adminUI');
+  const adminLogin = document.getElementById('adminLogin');
+  const adminPass = document.getElementById('adminPass');
+  const productSelect = document.getElementById('productSelect');
+  const productPrice = document.getElementById('productPrice');
+  const productQty = document.getElementById('productQty');
+  const ordersList = document.getElementById('ordersList');
+
+  const orderIdInput = document.getElementById('orderId');
+  const orderEmail = document.getElementById('orderEmail');
+  const orderName = document.getElementById('orderName');
+  const orderPhone = document.getElementById('orderPhone');
+  const orderNote = document.getElementById('orderNote');
+  const orderStatus = document.getElementById('orderStatus');
+  const saveOrderBtn = document.getElementById('saveOrder');
+  const refreshListBtn = document.getElementById('refreshList');
+  const clearFormBtn = document.getElementById('clearForm');
+
+  const goHomeBtn = document.getElementById('back');
+  if (goHomeBtn) goHomeBtn.addEventListener('click', () => location.href = 'index.html');
+
+  function getOrders(){ return JSON.parse(localStorage.getItem(LS_ORDERS) || '[]'); }
+  function saveOrders(list){ localStorage.setItem(LS_ORDERS, JSON.stringify(list)); }
+
+  function buildProducts(){
+    if(!productSelect) return;
+    productSelect.innerHTML = '';
+    PRODUCTS.forEach(p=>{
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = `${p.title} — ${p.price.toLocaleString()} сум`;
+      productSelect.appendChild(opt);
+    });
+    productPrice.value = PRODUCTS[0].price;
+  }
+
+  if (productSelect) {
+    productSelect.addEventListener('change', ()=> {
+      const p = PRODUCTS.find(x=>x.id == productSelect.value);
+      if(p) productPrice.value = p.price;
+    });
+  }
+
+  if (adminLogin) {
+    adminLogin.addEventListener('click', ()=> {
+      if(!adminPass) return alert('Поле пароля отсутствует');
+      if(adminPass.value === ADMIN_PASSWORD){
+        if (loginBlock) loginBlock.style.display = 'none';
+        if (adminUI) adminUI.style.display = 'block';
+        buildProducts();
+        renderOrders();
+      } else alert('❌ Неверный пароль');
+    });
+  }
+
+  function generateOrderId(){
+    const orders = getOrders();
+    const max = orders.reduce((m,o)=> Math.max(m, o.id || 500), 500);
+    return max + 1;
+  }
+
+  async function sendTelegram(text){
+    try{
+      const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({chat_id: TELEGRAM_CHAT_ID, text, parse_mode:'HTML'})
+      });
+      if(!res.ok) throw new Error(await res.text());
+      console.log('✅ Telegram уведомление отправлено');
+    }catch(e){
+      console.error('Ошибка Telegram:', e);
+    }
+  }
+
+  if (saveOrderBtn) {
+    saveOrderBtn.addEventListener('click', async ()=> {
+      const pid = productSelect ? +productSelect.value : 1;
+      const product = PRODUCTS.find(p=>p.id===pid) || PRODUCTS[0];
+      const qty = productQty ? +productQty.value || 1 : 1;
+      const price = productPrice ? +productPrice.value || product.price : product.price;
+      const name = orderName ? orderName.value.trim() : '';
+      const phone = orderPhone ? orderPhone.value.trim() : '';
+      const email = orderEmail ? orderEmail.value.trim() : '';
+      const note = orderNote ? orderNote.value.trim() : '';
+      const status = orderStatus ? orderStatus.value : 'В обработке';
+
+      if(!name || !phone){ alert('Введите имя и телефон'); return; }
+
+      let id = orderIdInput ? orderIdInput.value.trim() : '';
+      if(!id) id = generateOrderId(); else id = +id;
+
+      const orders = getOrders();
+      const existing = orders.findIndex(o => o.id === id);
+      const now = Date.now();
+      const orderData = {
+        id, name, phone, email, note, status,
+        items:[{id:pid, title:product.title, price, qty}],
+        total:price*qty, updatedAt:now, createdAt: now
+      };
+
+      if(existing >= 0) orders[existing] = orderData;
+      else orders.push(orderData);
+      saveOrders(orders);
+
+      await sendTelegram(`📝 Обновлён заказ #${id}\nИмя: ${name}\nТел: ${phone}\nСтатус: ${status}\nТовар: ${product.title} ×${qty}\nСумма: ${(price*qty).toLocaleString()} сум`);
+      alert('✅ Заказ сохранён!');
+      renderOrders();
+    });
+  }
+
+  // Открыть заказ в форме для редактирования
+  function openOrder(id){
+    const orders = getOrders();
+    const o = orders.find(x=>x.id === +id);
+    if(!o){ alert('Заказ не найден'); return; }
+    // заполняем поля
+    if(orderIdInput) orderIdInput.value = o.id;
+    if(orderName) orderName.value = o.name || '';
+    if(orderPhone) orderPhone.value = o.phone || '';
+    if(orderEmail) orderEmail.value = o.email || '';
+    if(orderNote) orderNote.value = o.note || '';
+    if(orderStatus) orderStatus.value = o.status || 'В обработке';
+    // если в заказе есть товар — установить в селекте и цену/кол-во
+    const firstItem = (o.items && o.items[0]) || null;
+    if(firstItem && productSelect){
+      productSelect.value = firstItem.id;
+      productPrice.value = firstItem.price;
+      if(productQty) productQty.value = firstItem.qty;
+    }
+    // показать панель (если скрыта) и прокрутить к форме
+    if(loginBlock) loginBlock.style.display = 'none';
+    if(adminUI) {
+      adminUI.style.display = 'block';
+      adminUI.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  }
+
+  // Удалить заказ
+  function deleteOrder(id){
+    if(!confirm(`Удалить заказ #${id}? Это действие нельзя отменить.`)) return;
+    let orders = getOrders();
+    orders = orders.filter(o => o.id !== +id);
+    saveOrders(orders);
+    renderOrders();
+  }
+
+  // Рендер списка заказов с кнопками Открыть и Удалить
+  function renderOrders(){
+    const list = getOrders().slice().reverse();
+    if(!ordersList) return;
+    if(list.length === 0){
+      ordersList.innerHTML = '<div class="muted">Пока нет заказов</div>';
+      return;
+    }
+    ordersList.innerHTML = list.map(o=>`
+      <div class="order-item">
+        <div><b>ID ${o.id}</b> — ${o.name || '—'} — ${o.status || '—'}</div>
+        <div class="order-actions">
+          <button class="btn-small open-btn" data-id="${o.id}">Открыть</button>
+          <button class="btn-small btn-delete" data-id="${o.id}">Удалить</button>
+        </div>
+      </div>`
+    ).join('');
+  }
+
+  // Делегируем клики по списку заказов
+  if(ordersList){
+    ordersList.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      const id = btn.getAttribute('data-id');
+      if(!id) return;
+      if(btn.classList.contains('open-btn')) {
+        openOrder(id);
+      } else if(btn.classList.contains('btn-delete')) {
+        deleteOrder(id);
+      }
+    });
+  }
+
+  if (refreshListBtn) refreshListBtn.addEventListener('click', renderOrders);
+  if (clearFormBtn) clearFormBtn.addEventListener('click', ()=> {
+    if(orderIdInput) orderIdInput.value = '';
+    if(orderName) orderName.value = '';
+    if(orderPhone) orderPhone.value = '';
+    if(orderEmail) orderEmail.value = '';
+    if(orderNote) orderNote.value = '';
+    if(orderStatus) orderStatus.value = 'В обработке';
+    if(productSelect) productSelect.selectedIndex = 0;
+    if(productPrice) productPrice.value = (PRODUCTS[0] && PRODUCTS[0].price) || '';
+    if(productQty) productQty.value = 1;
+  });
+
+});
+</script>
+</body>
+</html>

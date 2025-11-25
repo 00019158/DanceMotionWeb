@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Оформление заказа — Dance Motion</title>
+  <style>
+    :root{
+      --brand-light:#e3f1fe;
+      --brand-mid:#cce4fc;
+      --brand-dark:#004f73;
+      --muted:#6b7280;
+      --shadow:0 6px 18px rgba(0,0,0,0.06);
+    }
+    body{
+      margin:0;
+      font-family:Inter, "Segoe UI", Roboto, Arial;
+      background:var(--brand-light);
+      color:#0b1720;
+    }
+    header{
+      background:var(--brand-mid);
+      padding:10px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      box-shadow:var(--shadow);
+    }
+    header h2{margin:0;color:var(--brand-dark);}
+    header button{
+      background:transparent;
+      border:0;
+      color:var(--brand-dark);
+      font-size:16px;
+      cursor:pointer;
+    }
+    main{
+      max-width:600px;
+      margin:30px auto;
+      background:#fff;
+      padding:20px;
+      border-radius:12px;
+      box-shadow:var(--shadow);
+    }
+    h3{color:var(--brand-dark);}
+    label{display:block;margin-top:10px;font-weight:600;color:var(--brand-dark);}
+    input,textarea{
+      width:100%;
+      padding:10px;
+      border-radius:8px;
+      border:1px solid #dce5ee;
+      margin-top:5px;
+      font-size:14px;
+    }
+    button.submit{
+      width:100%;
+      margin-top:20px;
+      padding:12px;
+      background:var(--brand-dark);
+      color:#fff;
+      border:0;
+      border-radius:10px;
+      font-size:16px;
+      font-weight:600;
+      cursor:pointer;
+    }
+    .cart-summary{
+      background:var(--brand-mid);
+      padding:10px 12px;
+      border-radius:8px;
+      margin-top:15px;
+    }
+    .cart-summary div{margin:4px 0;}
+    .muted{color:var(--muted);font-size:14px;}
+    @media(max-width:480px){
+      main{margin:10px;padding:16px;}
+      header h2{font-size:18px;}
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <button onclick="window.history.back()">← Назад</button>
+    <h2>Оформление заказа</h2>
+  </header>
+
+  <main>
+    <h3>Ваши данные</h3>
+    <form id="checkoutForm">
+      <label>Имя</label>
+      <input id="name" required placeholder="Ваше имя">
+
+      <label>Телефон</label>
+      <input id="phone" type="tel" required placeholder="+998...">
+
+      <label>Город</label>
+      <input id="city" placeholder="Ташкент">
+
+      <label>Страна</label>
+      <input id="country" placeholder="Узбекистан">
+
+      <label>Примечание (опционально)</label>
+      <textarea id="note" rows="3" placeholder="Например: размер 38, короткий рукав"></textarea>
+
+      <div class="cart-summary" id="cartSummary"></div>
+
+      <button type="submit" class="submit">Отправить заказ</button>
+    </form>
+  </main>
+
+ <script src="/script.js"></script>
+<script>
+  // просто используем уже созданные в script.js объекты
+  cart = cart || JSON.parse(localStorage.getItem('dm_cart_v1') || '[]');
+  user = user || JSON.parse(localStorage.getItem('dm_user_v1') || '{}');
+
+  const cartSummary = document.getElementById('cartSummary');
+  if(cart.length === 0){
+    cartSummary.innerHTML = '<div class="muted">Корзина пуста</div>';
+  } else {
+    let total = 0;
+    cartSummary.innerHTML = cart.map(it=>{
+      const sub = Math.round(it.price * (1-(it.discount||0)/100) * it.qty);
+      total += sub;
+      return `<div>${it.title} × ${it.qty} — <b>${sub.toLocaleString()} сум</b></div>`;
+    }).join('') + `<hr><div><b>Итого: ${total.toLocaleString()} сум</b></div>`;
+  }
+
+  // автозаполнение
+  if(user.name) document.getElementById('name').value = user.name;
+  if(user.phone) document.getElementById('phone').value = user.phone;
+
+  document.getElementById('checkoutForm').onsubmit = async (e)=>{
+    e.preventDefault();
+    if(cart.length === 0){ alert('Корзина пуста'); return; }
+
+    const orderData = {
+      name: document.getElementById('name').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      city: document.getElementById('city').value.trim(),
+      country: document.getElementById('country').value.trim(),
+      note: document.getElementById('note').value.trim(),
+      items: cart
+    };
+
+    const res = await window.placeOrder(orderData);
+    if(res.ok){
+      alert('✅ Заказ успешно оформлен!');
+      localStorage.removeItem('dm_cart_v1');
+      localStorage.setItem('dm_user_v1', JSON.stringify({
+        logged:true,
+        name: orderData.name,
+        phone: orderData.phone,
+        id: res.id
+      }));
+      window.location.href = `order.html?id=${res.id}`;
+    } else {
+      alert('Ошибка оформления: ' + (res.error || 'Неизвестно'));
+    }
+  };
+</script>
+
+</body>
+</html>
