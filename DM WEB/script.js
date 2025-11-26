@@ -1,18 +1,35 @@
-/* script.js — основная логика для index.html
-   - Рендер каталога / корзины / профиль
-   - Работа с localStorage: cart, favs, user, orders
-   - Экспорт функций для checkout/admin/order страниц:
-     window.placeOrder(orderData), window.saveOrder(order), window.getOrders(), window.updateOrderStatus(id,status)
-*/
+// script.js (module) — ПОЛНЫЙ ФАЙЛ (замените текущий)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import {
+  getFirestore, doc, getDoc, setDoc, collection, getDocs, query, orderBy, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
-/* ========== CONFIG (вставь свой токен/чат если нужно) ========== */
+/* ================== FIREBASE CONFIG ================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAgyk4fu88ZfHEXsFvpDtRHYJa2XxlPRQY",
+  authDomain: "dancemotion-40d56.firebaseapp.com",
+  projectId: "dancemotion-40d56",
+  storageBucket: "dancemotion-40d56.firebasestorage.app",
+  messagingSenderId: "1095644417326",
+  appId: "1:1095644417326:web:b32ba0116b65a7d42abebf",
+  measurementId: "G-XNGTDZQPQQ"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+/* ========== CONFIG (Telegram и пр.) ========== */
 const TELEGRAM_BOT_TOKEN = '8182609479:AAG7AqcB8naX92u2XlHkxwp9R9IBhEhfoW0';
 const TELEGRAM_CHAT_ID  = '8492577684';
+const TELEGRAM_WEBHOOK_URL = ''; // если есть сервер — лучше указать его (рекомендуется)
 
-/* ========== DATA (каталог) ==========
-   Добавлена property `collection` чтобы товары попадали в фильтры:
-   'Рейтинг','Стандартные','Латинские','Аксессуары' (и т.д.)
-*/
+/* ========== DATA (каталог) ========== */
+// (оставил как у тебя — не менял данные)
 const PRODUCTS = [
   {id:1, title:'Туфли Рейтинг с ремешками - Белые (Кожа)', price:350000, category:'Девочкам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/w3.jpg'},
   {id:2, title:'Туфли Рейтинг с ремешками - Светло-Бежевые (Сатин)', price:350000, category:'Девочкам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/B2.jpg'},
@@ -20,35 +37,29 @@ const PRODUCTS = [
   {id:4, title:'Туфли Рейтинг с ремешками - Красные (Кожа)', price:350000, category:'Девочкам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/R.jpg'},
   {id:5, title:'Туфли Рейтинг с ремешками - Черные (Сатин)', price:350000, category:'Девочкам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/BL.jpg'},
   {id:6, title:'Туфли Рейтинг с ремешками - Коричневые (Сатин)', price:350000, category:'Девочкам', collection:'Рейтинг', type:'Туфли', discount:10, isNew:true, img:'/images/BR.jpg'},
-
   {id:7, title:'Согревающие Чуни (Серые)', price:350000, category:'Женщинам', collection:'Аксессуары', type:'Чуни', discount:0, isNew:true, img:'/images/S.png'},
   {id:8, title:'Согревающие Чуни (Небесно-голубой)', price:250000, category:'Женщинам', collection:'Аксессуары', type:'Чуни', discount:0, isNew:true, img:'/images/BCH.png'},
   {id:9, title:'Согревающие Чуни (Темно-Фиолетовые)', price:250000, category:'Женщинам', collection:'Аксессуары', type:'Чуни', discount:0, isNew:true, img:'/images/FCH.PNG'},
   {id:10, title:'Согревающие Чуни (Черные)', price:250000, category:'Женщинам', collection:'Аксессуары', type:'Чуни', discount:0, isNew:true, img:'/images/BLCH.PNG'},
   {id:11, title:'Согревающие Чуни (Градиент)', price:250000, category:'Женщинам', collection:'Аксессуары', type:'Чуни', discount:0, isNew:true, img:'/images/GCH.PNG'},
   {id:12, title:'Согревающие Чуни (Розовые)', price:250000, category:'Женщинам', collection:'Аксессуары', type:'Чуни', discount:0, isNew:true, img:'/images/PCH.png'},
-
   {id:13, title:'Стандартные туфли - (Шампань)', price:350000, category:'Женщинам', collection:'Стандартные', type:'Туфли', discount:0, isNew:true, img:'/images/SHST.PNG'},
   {id:14, title:'Стандартные туфли - (Белые)', price:350000, category:'Женщинам', collection:'Стандартные', type:'Туфли', discount:0, isNew:true, img:'/images/WHST.PNG'},
   {id:15, title:'Стандартные туфли - (Сатин)', price:350000, category:'Женщинам', collection:'Стандартные', type:'Туфли', discount:0, isNew:true, img:'/images/SST.PNG'},
-
   {id:16, title:'Латинские туфли - (Светло-Бежевые)', price:350000, category:'Женщинам', collection:'Латинские', type:'Туфли', discount:0, isNew:true, img:'/images/GLT.PNG'},
   {id:17, title:'Латинские туфли - (Черные)', price:350000, category:'Женщинам', collection:'Латинские', type:'Туфли', discount:0, isNew:true, img:'/images/BLT.PNG'},
   {id:18, title:'Латинские туфли - (Сатин)', price:350000, category:'Женщинам', collection:'Латинские', type:'Туфли', discount:0, isNew:true, img:'/images/SLT.PNG'},
   {id:19, title:'Латинские туфли - (Шампань)', price:350000, category:'Женщинам', collection:'Латинские', type:'Туфли', discount:0, isNew:true, img:'/images/SHLT.PNG'},
   {id:20, title:'Латинские туфли - (Градиент)', price:350000, category:'Женщинам', collection:'Латинские', type:'Туфли', discount:0, isNew:true, img:'/images/GRLT.PNG'},
-
   {id:21, title:'Тренировочные туфли (Золотые Поцелуи)', price:350000, category:'Женщинам', collection:'Стандартные', type:'Тренировочные', discount:0, isNew:true, img:'/images/GT.PNG'},
   {id:22, title:'Тренировочные туфли (Красные Поцелуи)', price:350000, category:'Женщинам', collection:'Стандартные', type:'Тренировочные', discount:0, isNew:true, img:'/images/RT.PNG'},
   {id:23, title:'Тренировочные туфли (Градиентовые Поцелуи)', price:350000, category:'Женщинам', collection:'Стандартные', type:'Тренировочные', discount:0, isNew:true, img:'/images/GRT.PNG'},
-
   {id:24, title:'Туфли Рейтинг - (Сатин)', price:350000, category:'Женщинам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/SR.PNG'},
   {id:25, title:'Туфли Рейтинг - (Белые)', price:350000, category:'Женщинам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/WHR.PNG'},
   {id:26, title:'Туфли Рейтинг - (Черные)', price:350000, category:'Женщинам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/BRT.PNG'},
   {id:27, title:'Туфли Рейтинг плетение - (Персиковые)', price:350000, category:'Женщинам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/PR.PNG'},
   {id:28, title:'Туфли Рейтинг плетение - (Белые)', price:350000, category:'Женщинам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/WHRT.PNG'},
   {id:29, title:'Туфли Рейтинг - (Черные)', price:350000, category:'Женщинам', collection:'Рейтинг', type:'Туфли', discount:0, isNew:true, img:'/images/BLRT.PNG'},
-
   {id:30, title:'Гетры - (Черные)', price:120000, category:'Женщинам', collection:'Аксессуары', type:'Гетры', discount:0, isNew:true, img:'/images/GET.PNG'},
   {id:31, title:'Гетры - (Белые)', price:120000, category:'Женщинам', collection:'Аксессуары', type:'Гетры', discount:0, isNew:true, img:'/images/GETWH.PNG'},
   {id:32, title:'Гетры - (Фирменный цвет DanceMotion)', price:120000, category:'Женщинам', collection:'Аксессуары', type:'Гетры', discount:0, isNew:true, img:'/images/GETB.PNG'},
@@ -71,7 +82,12 @@ let cart = readJSON(LS_CART, []);
 let favs = readJSON(LS_FAV, []);
 let user = readJSON(LS_USER, { logged:false, name:'', phone:'', id:null, cashback:0 });
 
-/* ========== DOM refs (index.html) - guard на случай если файл подключён на другой странице */ 
+/* ========== Expose cart for legacy pages (fix `cart is not defined`) ========== */
+window.getCart = () => cart;
+window._syncCartToWindow = () => { try { window.cart = cart; } catch(e){} };
+window.cart = cart;
+
+/* ========== DOM refs (index.html) */ 
 const productsGrid   = document.getElementById('productsGrid');
 const discountsGrid  = document.getElementById('discountsGrid');
 const categoryNav    = document.getElementById('categoryNav');
@@ -98,10 +114,7 @@ const applyCashbackBtnEl  = document.getElementById('applyCashbackBtn');
 
 const shopNowBtn     = document.getElementById('shopNow');
 
-/* categories list and active
-   Здесь финальный набор кнопок, который вы просили:
-   Все, Женщинам, Девочкам, Мальчикам, Рейтинг, Стандартные, Латинские, Аксессуары, Скидки
-*/
+/* categories list and active */
 const categories = ['Все','Женщинам','Девочкам','Мальчикам','Рейтинг','Стандартные','Латинские','Аксессуары','Скидки'];
 let activeCategory = 'Все';
 
@@ -118,25 +131,21 @@ function renderCategoryNav(){
   });
 }
 
-/* Фильтрация товаров по activeCategory и поиску */
 function productMatchesFilter(p){
   const q = (searchInput && searchInput.value || '').trim().toLowerCase();
 
   if(activeCategory !== 'Все'){
     if(activeCategory === 'Скидки' && !(p.discount > 0)) return false;
 
-    // фильтры по полу/категории (Женщинам/Девочкам/Мальчикам)
     if(['Женщинам','Девочкам','Мальчикам'].includes(activeCategory)){
       if(p.category !== activeCategory) return false;
     }
 
-    // фильтры по коллекциям
     if(['Рейтинг','Стандартные','Латинские','Аксессуары'].includes(activeCategory)){
       if((p.collection || '').toLowerCase() !== activeCategory.toLowerCase()) return false;
     }
   }
 
-  // поиск по title / category / type / collection
   if(q){
     const hay = (((p.title || '') + ' ' + (p.category || '') + ' ' + (p.type || '') + ' ' + (p.collection || '')).toLowerCase());
     if(!hay.includes(q)) return false;
@@ -148,16 +157,17 @@ function productMatchesFilter(p){
 function createProductCard(p){
   const div = document.createElement('div');
   div.className = 'card';
-  // dataset для возможного использования в фильтрах/отладке
   div.dataset.id = p.id;
   if(p.category) div.dataset.category = p.category;
   if(p.collection) div.dataset.collection = p.collection;
   if(p.discount && p.discount > 0) div.dataset.discount = 'true';
 
   div.innerHTML = `
-    <div class="img-box">
-      <img src="${p.img}" alt="${escapeHtml(p.title)}" style="max-height:100%;max-width:100%;object-fit:contain;border-radius:10px">
-      ${p.isNew ? '<div class="new-label">NEW</div>' : ''}
+    <div style="position:relative">
+      <div class="img-box">
+        <img src="${p.img}" alt="${escapeHtml(p.title)}" style="max-height:100%;max-width:100%;object-fit:contain;border-radius:10px">
+        ${p.isNew ? '<div class="new-label">NEW</div>' : ''}
+      </div>
     </div>
     <div>
       <div class="title">${escapeHtml(p.title)}</div>
@@ -180,7 +190,6 @@ function createProductCard(p){
   return div;
 }
 
-/* простая защита от XSS для title/meta */
 function escapeHtml(s){
   return String(s || '').replace(/[&<>"']/g, function(m){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m];
@@ -242,7 +251,6 @@ function renderCartDrawer(){
     });
   }
 
-  // attach handlers
   cartList.querySelectorAll('[data-action]').forEach(btn=>{
     btn.onclick = () => {
       const id = +btn.getAttribute('data-id');
@@ -256,7 +264,6 @@ function renderCartDrawer(){
   const total = cart.reduce((s,i)=> s + Math.round(i.price * (1 - (i.discount||0)/100) * i.qty), 0);
   if(cartTotalEl) cartTotalEl.textContent = formatSum(total);
 
-  // cashback guard
   const maxUse = Math.min(user.cashback || 0, total);
   if(window.appliedCashback > maxUse) window.appliedCashback = maxUse;
   if(cashbackUseInput) cashbackUseInput.value = window.appliedCashback > 0 ? window.appliedCashback : '';
@@ -264,25 +271,29 @@ function renderCartDrawer(){
 }
 
 /* ========== CART OPERATIONS ========== */
+function syncCartAndLS(){
+  writeJSON(LS_CART, cart);
+  window._syncCartToWindow();
+}
 function addToCart(id){
   const product = PRODUCTS.find(p=>p.id===id); if(!product) return;
   const existing = cart.find(i=>i.id===id);
   if(existing) existing.qty++;
   else cart.push({ id:product.id, title:product.title, price:product.price, discount:product.discount, qty:1 });
-  writeJSON(LS_CART, cart);
+  syncCartAndLS();
   showCartDrawer(true);
   renderAll();
 }
 function removeFromCart(id){
   cart = cart.filter(i => i.id !== id);
-  writeJSON(LS_CART, cart);
+  syncCartAndLS();
   renderAll();
 }
 function changeQty(id, delta){
   const it = cart.find(i=>i.id===id);
   if(!it) return;
   it.qty = Math.max(1, it.qty + delta);
-  writeJSON(LS_CART, cart);
+  syncCartAndLS();
   renderAll();
 }
 
@@ -330,14 +341,30 @@ function renderProfile(){
     `;
     profileBody.appendChild(div);
 
-    document.getElementById('loginBtn').onclick = () => {
+    document.getElementById('loginBtn').onclick = async () => {
       const idVal = document.getElementById('loginId').value.trim();
       const phoneVal = document.getElementById('loginPhone').value.trim();
       const nameVal = document.getElementById('loginName').value.trim();
-      const orders = readJSON(LS_ORDERS, []);
+
+      // сначала локально
+      const ordersLS = readJSON(LS_ORDERS, []);
       let found = null;
-      if(idVal) found = orders.find(o => String(o.id) === idVal);
-      else if(phoneVal) found = orders.find(o => o.phone === phoneVal);
+      if(idVal) found = ordersLS.find(o => String(o.id) === idVal);
+      else if(phoneVal) found = ordersLS.find(o => o.phone === phoneVal);
+
+      // если не нашли локально, попробуем Firestore (если id указан)
+      if(!found && idVal) {
+        try {
+          const remote = await fetchOrderFromFirestore(idVal);
+          if(remote) {
+            _saveOrderInternal(Object.assign({}, remote));
+            found = remote;
+            console.info('Найден заказ в Firestore и сохранён в LS:', remote.id);
+          }
+        } catch(e) {
+          console.warn('firestore lookup failed', e);
+        }
+      }
 
       if(found){
         user = { logged:true, name: nameVal || found.name || '', phone: phoneVal || found.phone || '', id: found.id, cashback: found.cashback || 0 };
@@ -349,7 +376,6 @@ function renderProfile(){
           alert('Заказ с таким ID не найден');
           return;
         }
-        // login by phone without order -> create ephemeral user (allows creating order later)
         if(phoneVal){
           const newId = generateOrderId();
           user = { logged:true, name: nameVal || '', phone: phoneVal, id:newId, cashback:0 };
@@ -388,7 +414,6 @@ function generateOrderId() {
 }
 
 function saveOrder(order){
-  // order: { id, name, phone, items:[], total, status, note, cashback }
   const orders = readJSON(LS_ORDERS, []);
   const idx = orders.findIndex(o => o.id === order.id);
   if(idx >= 0) orders[idx] = order;
@@ -398,9 +423,72 @@ function saveOrder(order){
 function getOrders(){ return readJSON(LS_ORDERS, []); }
 function findOrderById(id){ const orders = readJSON(LS_ORDERS, []); return orders.find(o => String(o.id) === String(id)); }
 
+/* ========== Firestore helpers (чтение/запись) ========== */
+async function fetchOrderFromFirestore(id){
+  if(!id) return null;
+  try{
+    const snap = await getDoc(doc(db, 'orders', String(id)));
+    if(!snap.exists()) return null;
+    const data = snap.data();
+    if(data.updated_at && data.updated_at.toDate) data.updated_at = data.updated_at.toDate().toISOString();
+    if(data.created_at && data.created_at.toDate) data.created_at = data.created_at.toDate().toISOString();
+    data.id = data.id || id;
+    return data;
+  } catch(e){
+    console.error('Firestore fetch error', e);
+    return null;
+  }
+}
+
+async function fetchOrdersFromFirestore(){
+  try{
+    const q = query(collection(db,'orders'), orderBy('created_at','desc'));
+    const snap = await getDocs(q);
+    const out = [];
+    snap.forEach(d => {
+      const obj = d.data();
+      obj.id = obj.id || d.id;
+      out.push(obj);
+    });
+    return out;
+  } catch(e){
+    console.error('Firestore fetchOrders error', e);
+    return [];
+  }
+}
+
+async function writeOrderToFirestore(order){
+  try{
+    const id = String(order.id || generateOrderId());
+    const payload = Object.assign({}, order, {
+      id,
+      updated_at: serverTimestamp(),
+      created_at: order.created_at ? order.created_at : serverTimestamp()
+    });
+    await setDoc(doc(db,'orders', id), payload, { merge: true });
+    return { ok:true };
+  }catch(e){
+    console.error('Firestore write error', e);
+    return { ok:false, error: e.message || String(e) };
+  }
+}
+
 /* ========== Telegram (send message) ========== */
 async function sendTelegramMessage(text, parseMode = 'HTML') {
   try {
+    console.info('sendTelegramMessage: trying to send...', { webhook: !!TELEGRAM_WEBHOOK_URL });
+    if (TELEGRAM_WEBHOOK_URL && TELEGRAM_WEBHOOK_URL.trim() !== '') {
+      const res = await fetch(TELEGRAM_WEBHOOK_URL, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ text })
+      });
+      const txt = await res.text();
+      console.info('Webhook response:', res.status, txt);
+      return res.ok;
+    }
+
+    // direct call to Telegram API (may be blocked by CORS in browser)
     const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -410,21 +498,25 @@ async function sendTelegramMessage(text, parseMode = 'HTML') {
         parse_mode: parseMode
       })
     });
-    const data = await res.json();
-    console.log('Telegram response:', data);
-    return res.ok;
+
+    let data;
+    try { data = await res.json(); } catch(e){ data = {ok:false, error:'invalid json', raw: await res.text()}; }
+    console.log('Telegram API response', data);
+
+    if(!res.ok || data.ok === false){
+      console.error('Telegram send failed', data);
+      // if CORS blocked, fetch throws; if telegram returns error -> log code
+      return false;
+    }
+    return true;
   } catch (err) {
-    console.error('Telegram send error', err);
+    console.error('Telegram send exception', err);
+    // возможно CORS / network - логируем для диагностики
     return false;
   }
 }
 
-/* ========== Public API for checkout/admin/order pages ========== */
-/**
- * placeOrder(orderData)
- * orderData: { name, phone, city, country, items: [{id,title,qty,price,discount}], note(optional) }
- * returns: { ok:true, id: ### } or { ok:false, error:'...' }
- */
+/* ========== Public API ========== */
 window.placeOrder = async function(orderData){
   try {
     if(!orderData || !Array.isArray(orderData.items) || orderData.items.length === 0) return { ok:false, error: 'Пустая корзина' };
@@ -443,12 +535,29 @@ window.placeOrder = async function(orderData){
       cashback: Math.round(total * 0.05),
       created_at: (new Date()).toISOString()
     };
+
+    // Сохраняем локально (чтобы клиент мог потом войти)
     saveOrder(order);
 
-    // notify admin in telegram
+    // Пишем в Firestore (ненавязчиво, но ждём результат)
+    try {
+      const wf = await writeOrderToFirestore(order);
+      if(!wf.ok) console.warn('Firestore write returned error', wf);
+      else console.info('Order written to Firestore:', order.id);
+    } catch(e) {
+      console.warn('writeOrderToFirestore failed:', e);
+    }
+
+    // notify admin in telegram (await, чтобы точно знать результат)
     let itemsText = order.items.map(it => `• ${it.title} × ${it.qty} — ${ (Math.round((it.price || 0) * (1 - (it.discount||0)/100) * (it.qty||1))).toLocaleString() } сум`).join('\n');
     const message = `<b>Новый заказ #${order.id}</b>\nИмя: ${order.name}\nТел: ${order.phone}\nГород: ${order.city}\n\n${itemsText}\n\nИтого: ${order.total.toLocaleString()} сум\nСтатус: ${order.status}`;
-    await sendTelegramMessage(message, 'HTML');
+
+    const tgOk = await sendTelegramMessage(message, 'HTML');
+    if(!tgOk) {
+      console.warn('Telegram send returned false — возможно CORS или неверный токен/chat_id. Проверь консоль network и вывод выше.');
+    } else {
+      console.info('Telegram notification sent for order', order.id);
+    }
 
     return { ok:true, id };
   } catch (e){
@@ -457,7 +566,6 @@ window.placeOrder = async function(orderData){
   }
 };
 
-// внутренняя функция для работы с localStorage
 function _saveOrderInternal(order) {
   const orders = readJSON(LS_ORDERS, []);
   const idx = orders.findIndex(o => o.id === order.id);
@@ -472,14 +580,8 @@ window.saveOrder = function(order){
   return { ok:true };
 };
 
-/**
- * getOrders - для админки
- */
 window.getOrders = function(){ return getOrders(); };
 
-/**
- * updateOrderStatus(id, status) - обновляет статус и уведомляет в телеграм
- */
 window.updateOrderStatus = async function(id, status){
   const orders = readJSON(LS_ORDERS, []);
   const idx = orders.findIndex(o => String(o.id) === String(id));
@@ -495,13 +597,13 @@ window.updateOrderStatus = async function(id, status){
 /* ========== Checkout redirect (index -> checkout.html) ========== */
 if(checkoutBtnEl) {
   checkoutBtnEl.addEventListener('click', () => {
-    // save cart to LS (checkout page will read it)
     writeJSON(LS_CART, cart);
+    window._syncCartToWindow();
     window.location.href = 'checkout.html';
   });
 }
 
-/* ========== Apply cashback - simple UI (in drawer) ========== */
+/* ========== Apply cashback ========== */
 window.appliedCashback = 0;
 if(applyCashbackBtnEl) applyCashbackBtnEl.onclick = ()=>{
   const requested = Number((cashbackUseInput && cashbackUseInput.value) || 0);
@@ -514,14 +616,13 @@ if(applyCashbackBtnEl) applyCashbackBtnEl.onclick = ()=>{
   renderCartDrawer();
 };
 
-/* ========== Delegated handlers (Add to cart / Fav) ========== */
+/* ========== Delegated handlers ========== */
 document.addEventListener('click', (e)=>{
   const el = e.target;
   if(el.matches('.card .btn.cart')) { const id = +el.getAttribute('data-id'); addToCart(id); }
   if(el.matches('.card .btn.fav')) { const id = +el.getAttribute('data-id'); toggleFav(id); renderAll(); }
 });
 
-/* fav toggle */
 function toggleFav(id){
   const p = PRODUCTS.find(x => x.id === id);
   if(!p) return;
@@ -547,14 +648,27 @@ function renderAll(){
   renderCounters();
   renderCartDrawer();
   renderProfile();
+  // After render sync global cart reference (for legacy pages)
+  window._syncCartToWindow();
 }
 renderAll();
 
-/* ========== Expose small helpers for debugging in console ========== */
+/* ========== Firestore Auth state sync for admin.html usage ========== */
+onAuthStateChanged(auth, (u)=>{
+  console.log('Auth state changed (admin):', u ? u.email : null);
+});
+
+/* ========== expose helpers for admin.html and debugging ========== */
 window._dm = {
   getOrders,
   findOrderById,
   saveOrder,
   placeOrder: window.placeOrder,
   updateOrderStatus: window.updateOrderStatus,
+  fetchOrderFromFirestore,
+  fetchOrdersFromFirestore,
+  writeOrderToFirestore,
+  auth,
+  signInWithPopupFn: async ()=> signInWithPopup(auth, provider),
+  signOutFn: async ()=> signOut(auth)
 };
