@@ -109,11 +109,13 @@
     </form>
   </main>
 
- <script src="/script.js"></script>
+<script type="module" src="/script.js"></script>
+
 <script>
-  // просто используем уже созданные в script.js объекты
-  cart = cart || JSON.parse(localStorage.getItem('dm_cart_v1') || '[]');
-  user = user || JSON.parse(localStorage.getItem('dm_user_v1') || '{}');
+  // Надёжно получить корзину (работает и если script.js уже экспортировал getCart, и если нет)
+  const cart = (window.getCart && typeof window.getCart === 'function') ? window.getCart() : JSON.parse(localStorage.getItem('dm_cart_v1') || '[]');
+  const user = JSON.parse(localStorage.getItem('dm_user_v1') || '{"logged":false,"name":"","phone":"","id":null,"cashback":0}');
+  // ...далее остальной код использует cart и user (замени все использования глобальной cart переменной на локальную const cart)
 
   const cartSummary = document.getElementById('cartSummary');
   if(cart.length === 0){
